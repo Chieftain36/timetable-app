@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>University Timetable</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  </head>
+  <body class="min-h-screen bg-slate-100 text-slate-900">
+    <main id="login-view" class="grid min-h-screen place-items-center p-4">
+      <section class="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl shadow-slate-200/70">
+        <p class="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-indigo-600">University</p>
+        <h1 class="text-3xl font-bold tracking-tight">Timetable Generator</h1>
+        <p class="mt-2 text-slate-600">Sign in to manage timetable data and schedules.</p>
+        <form id="login-form" class="mt-8 space-y-5">
+          <label class="block text-sm font-medium">
+            Email
+            <input name="email" type="email" required autocomplete="email" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" />
+          </label>
+          <label class="block text-sm font-medium">
+            Password
+            <input name="password" type="password" required autocomplete="current-password" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" />
+          </label>
+          <button class="w-full rounded-lg bg-indigo-600 px-4 py-2.5 font-semibold text-white transition hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-200">Sign in</button>
+        </form>
+        <p id="login-error" class="mt-4 hidden rounded-lg bg-rose-50 p-3 text-sm text-rose-700"></p>
+      </section>
+    </main>
+
+    <main id="app-view" class="hidden min-h-screen">
+      <header class="border-b border-slate-200 bg-white">
+        <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
+          <div>
+            <h1 class="text-xl font-bold">University Timetable</h1>
+            <p id="identity" class="text-sm text-slate-500"></p>
+          </div>
+          <button id="logout-button" class="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium hover:bg-slate-50">Sign out</button>
+        </div>
+      </header>
+
+      <div class="mx-auto grid max-w-7xl gap-6 p-4 sm:p-6 lg:grid-cols-[220px_1fr]">
+        <aside class="rounded-xl bg-slate-900 p-3 text-slate-100 shadow-sm">
+          <nav id="navigation" class="space-y-1" aria-label="Administration navigation"></nav>
+        </aside>
+        <section class="min-w-0">
+          <div id="notice" class="mb-4 hidden rounded-lg p-3 text-sm"></div>
+          <div id="content"></div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      const API_BASE = '/api/v1';
+      const TOKEN_KEY = 'university-timetable-token';
+      const DAYS = ['', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+      let activeView = 'timetable';
+      let tokenPayload = null;
+      let cachedData = {};
+
+      const entityConfigs = {
+        users: {
+          title: 'Users', endpoint: '/users',
+          fields: [
+            { name: 'email', label: 'Email', type: 'email', required: true },
+            { name: 'password', label: 'Password', type: 'password', required: true },
+            { name: 'role', label: 'Role', type: 'select', options: ['admin', 'instructor', 'student'], required: true },
+          ],
+          columns: ['email', 'role', 'created_at'],
+        },
+        courses: {
+          title: 'Courses', endpoint: '/courses',
+          fields: [
+            { name: 'code', label: 'Code', type: 'text', required: true },
+            { name: 'name', label: 'Name', type: 'text', required: true },
+            { name: 'description', label: 'Description', type: 'text' },
+          ],
+          columns: ['code', 'name', 'description'],
+        },
+        rooms: {
+          title: 'Rooms', endpoint: '/rooms',
+          fields: [
+            { name: 'name', label: 'Room name', type: 'text', required: true },
+            { name: 'building', label: 'Building', type: 'text', required: true },
+            { name: 'capacity', label: 'Capacity', type: 'number', required: true, min: 1 },
+            { name: 'is_active', label: 'Available for scheduling', type: 'checkbox', checked: true },
+          ],
+          columns: ['name', 'building', 'capacity', 'is_active'],
+        },
+        groups: {
+          title: 'Student groups', endpoint: '/student-groups',
+          fields: [
+            { name: 'name', label: 'Group name', type: 'text', required: true },
+            { name: 'student_count', label: 'Student count', type: 'number', required: true, min: 1 },
+          ],
+          columns: ['name', 'student_count'],
+        },
+        instructors: {
+          title: 'Instructors', endpoint: '/instructors',
+          fields: [
+            { name: 'user_id', label: 'Instructor user ID', type: 'text', required: true },
+            { name: 'department', label: 'Department', type: 'text', required: true },
+            { name: 'title', label: 'Title', type: 'text' },
+          ],
+          columns: ['email', 'department', 'title', 'user_id'],
+        },
+        slots: {
+          title: 'Weekly time slots', endpoint: '/time-slots',
+          fields: [
+            { name: 'day_of_week', label: 'Day', type: 'select', options: [1, 2, 3, 4, 5, 6, 7], required: true },
+            { name: 'start_time', label: 'Start time', type: 'time', required: true },
+            { name: 'end_time', label: 'End time', type: 'time', required: true },
+          ],
+          columns: ['day_of_week', 'start_time', 'end_time'],
+        },
+      };
+
+      function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
+      }
+
+      function formatValue(value, field) {
+        if (field === 'day_of_week') return DAYS[Number(value)] || value;
+        if (field === 'is_active') return value ? 'Yes' : 'No';
+        if (field === 'created_at' && value) return new Date(value).toLocaleString();
+        return value ?? '—';
+      }
+
+      function showNotice(message, type = 'success') {
+        const notice = document.getElementById('notice');
+        notice.textContent = message;
+        notice.className = `mb-4 rounded-lg p-3 text-sm ${type === 'error' ? 'bg-rose-50 text-rose-700' : 'bg-emerald-50 text-emerald-700'}`;
+      }
+
+      function hideNotice() {
+        const notice = document.getElementById('notice');
+        notice.className = 'mb-4 hidden rounded-lg p-3 text-sm';
+        notice.textContent = '';
+      }
+
+      function tokenFromStorage() {
+        return localStorage.getItem(TOKEN_KEY);
+      }
+
+      function decodeJwt(token) {
+        const part = token.split('.')[1];
+        if (!part) throw new Error('Malformed authentication token');
+        const base64 = part.replace(/-/g, '+').replace(/_/g, '/');
+        return JSON.parse(decodeURIComponent(Array.from(atob(base64), char => `%${char.charCodeAt(0).toString(16).padStart(2, '0')}`).join('')));
+      }
+
+      async function api(path, options = {}) {
+        const token = tokenFromStorage();
+        const headers = { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...(options.headers || {}) };
+        if (token) headers.Authorization = `Bearer ${token}`;
+        const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
+        const isJson = response.headers.get('content-type')?.includes('application/json');
+        const payload = isJson ? await response.json() : null;
+        if (!response.ok) {
+          if (response.status === 401) logout(false);
+          const detail = typeof payload?.detail === 'object' ? JSON.stringify(payload.detail) : payload?.detail;
+          throw new Error(detail || `Request failed with status ${response.status}`);
+        }
+        return payload;
+      }
+
+      function renderNavigation() {
+        const nav = document.getElementById('navigation');
+        const items = [
+          ['timetable', 'Weekly timetable'], ['generate', 'Generate schedule'], ['users', 'Users'],
+          ['courses', 'Courses'], ['rooms', 'Rooms'], ['groups', 'Student groups'],
+          ['instructors', 'Instructors'], ['slots', 'Time slots'], ['conflicts', 'Conflict check'],
+        ];
+        nav.innerHTML = items.map(([id, label]) => `<button data-view="${id}" class="nav-button block w-full rounded-lg px-3 py-2 text-left text-sm font-medium transition ${activeView === id ? 'bg-indigo-500 text-white' : 'text-slate-200 hover:bg-slate-800'}">${label}</button>`).join('');
+        nav.querySelectorAll('.nav-button').forEach(button => button.addEventListener('click', () => {
+          activeView = button.dataset.view;
+          hideNotice();
+          renderNavigation();
+          renderView();
+        }));
+      }
+
+      function renderEntityTable(config, rows) {
+        const headers = config.columns.map(column => `<th class="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">${escapeHtml(column.replaceAll('_', ' '))}</th>`).join('');
+        const body = rows.length ? rows.map(row => `<tr class="border-t border-slate-100">${config.columns.map(column => `<td class="max-w-xs break-words px-4 py-3 text-sm text-slate-700">${escapeHtml(formatValue(row[column], column))}</td>`).join('')}</tr>`).join('') : `<tr><td colspan="${config.columns.length}" class="px-4 py-8 text-center text-sm text-slate-500">No records yet.</td></tr>`;
+        return `<div class="overflow-x-auto rounded-xl bg-white shadow-sm"><table class="min-w-full"><thead class="bg-slate-50"><tr>${headers}</tr></thead><tbody>${body}</tbody></table></div>`;
+      }
+
+      function fieldMarkup(field) {
+        const required = field.required ? 'required' : '';
+        const min = field.min ? `min="${field.min}"` : '';
+        if (field.type === 'checkbox') return `<label class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium"><input name="${field.name}" type="checkbox" ${field.checked ? 'checked' : ''} /> ${field.label}</label>`;
+        if (field.type === 'select') {
+          const options = field.options.map(value => `<option value="${value}">${field.name === 'day_of_week' ? DAYS[value] : value}</option>`).join('');
+          return `<label class="block text-sm font-medium">${field.label}<select name="${field.name}" ${required} class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2">${options}</select></label>`;
+        }
+        return `<label class="block text-sm font-medium">${field.label}<input name="${field.name}" type="${field.type}" ${required} ${min} class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" /></label>`;
+      }
+
+      function renderEntityView(key) {
+        const config = entityConfigs[key];
+        const rows = cachedData[key] || [];
+        document.getElementById('content').innerHTML = `
+          <div class="mb-6 flex flex-wrap items-end justify-between gap-3"><div><h2 class="text-2xl font-bold">${config.title}</h2><p class="mt-1 text-sm text-slate-600">Create a new record, then refresh the list automatically.</p></div></div>
+          <form id="entity-form" class="mb-6 grid gap-4 rounded-xl bg-white p-5 shadow-sm sm:grid-cols-2 xl:grid-cols-4">${config.fields.map(fieldMarkup).join('')}<div class="flex items-end"><button class="w-full rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700">Create</button></div></form>
+          ${renderEntityTable(config, rows)}
+        `;
+        document.getElementById('entity-form').addEventListener('submit', async event => {
+          event.preventDefault();
+          const form = event.currentTarget;
+          const payload = {};
+          for (const field of config.fields) {
+            const input = form.elements[field.name];
+            if (field.type === 'checkbox') payload[field.name] = input.checked;
+            else if (field.type === 'number') payload[field.name] = Number(input.value);
+            else if (input.value || field.required) payload[field.name] = input.value;
+            else payload[field.name] = null;
+          }
+          try {
+            await api(config.endpoint, { method: 'POST', body: JSON.stringify(payload) });
+            showNotice(`${config.title.slice(0, -1)} created.`);
+            await refreshData([key]);
+            renderEntityView(key);
+          } catch (error) { showNotice(error.message, 'error'); }
+        });
+      }
+
+      function renderGenerateView() {
+        document.getElementById('content').innerHTML = `
+          <div class="max-w-3xl"><h2 class="text-2xl font-bold">Generate automatic timetable</h2><p class="mt-1 text-sm text-slate-600">Enter one assignment per line: course UUID, group UUID, instructor UUID, sessions per week.</p>
+          <form id="generate-form" class="mt-6 space-y-4 rounded-xl bg-white p-5 shadow-sm">
+            <label class="block text-sm font-medium">Assignments<textarea name="assignments" rows="8" required class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm" placeholder="course-id,group-id,instructor-id,1"></textarea></label>
+            <label class="flex items-center gap-2 text-sm font-medium"><input name="replace_existing" type="checkbox" /> Replace all existing schedule entries</label>
+            <button class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700">Generate automatic timetable</button>
+          </form>
+          <pre id="generation-result" class="mt-5 hidden overflow-x-auto rounded-xl bg-slate-900 p-4 text-sm text-slate-100"></pre></div>`;
+        document.getElementById('generate-form').addEventListener('submit', async event => {
+          event.preventDefault();
+          const form = event.currentTarget;
+          try {
+            const assignments = form.assignments.value.trim().split(/\n+/).map((line, index) => {
+              const values = line.split(',').map(value => value.trim());
+              if (values.length !== 4 || values.some(value => !value)) throw new Error(`Line ${index + 1} must contain four comma-separated values.`);
+              return { course_id: values[0], group_id: values[1], instructor_id: values[2], sessions_per_week: Number(values[3]) };
+            });
+            const result = await api('/schedules/generate', { method: 'POST', body: JSON.stringify({ assignments, replace_existing: form.replace_existing.checked }) });
+            const output = document.getElementById('generation-result');
+            output.textContent = JSON.stringify(result, null, 2);
+            output.classList.remove('hidden');
+            showNotice(`${result.generated_count} schedule entries generated.`);
+            await refreshData(['slots', 'schedules']);
+          } catch (error) { showNotice(error.message, 'error'); }
+        });
+      }
+
+      function renderTimetable() {
+        const slots = cachedData.slots || [];
+        const schedules = cachedData.schedules || [];
+        const slotById = new Map(slots.map(slot => [slot.id, slot]));
+        const rows = [...new Map(slots.map(slot => [`${slot.start_time}–${slot.end_time}`, { start_time: slot.start_time, end_time: slot.end_time }])).values()];
+        const cells = new Map();
+        for (const schedule of schedules) {
+          const slot = slotById.get(schedule.time_slot_id);
+          if (!slot) continue;
+          const key = `${slot.start_time}–${slot.end_time}|${slot.day_of_week}`;
+          cells.set(key, [...(cells.get(key) || []), schedule]);
+        }
+        const cellsFor = (row, day) => (cells.get(`${row.start_time}–${row.end_time}|${day}`) || []).map(item => `<article class="mb-2 rounded-md bg-indigo-50 p-2 text-xs text-indigo-950 last:mb-0"><strong>${escapeHtml(item.course_code)}</strong><br>${escapeHtml(item.group_name)} · ${escapeHtml(item.room_name)}<br><span class="text-indigo-700">${escapeHtml(item.instructor_email)}</span></article>`).join('');
+        const header = DAYS.slice(1).map(day => `<th class="min-w-40 border-l border-slate-200 px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">${day}</th>`).join('');
+        const body = rows.length ? rows.map(row => `<tr class="border-t border-slate-200"><th class="whitespace-nowrap bg-slate-50 px-3 py-3 text-left text-sm font-semibold text-slate-700">${row.start_time}–${row.end_time}</th>${DAYS.slice(1).map((_, offset) => `<td class="min-h-24 border-l border-slate-200 p-2 align-top">${cellsFor(row, offset + 1)}</td>`).join('')}</tr>`).join('') : '<tr><td colspan="8" class="p-8 text-center text-sm text-slate-500">Create time slots to display the weekly matrix.</td></tr>';
+        document.getElementById('content').innerHTML = `<div class="mb-6 flex flex-wrap items-end justify-between gap-3"><div><h2 class="text-2xl font-bold">Weekly timetable</h2><p class="mt-1 text-sm text-slate-600">Course, room, group, and instructor assignments by day and time.</p></div><button id="refresh-timetable" class="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium hover:bg-white">Refresh</button></div><div class="overflow-x-auto rounded-xl bg-white shadow-sm"><table class="min-w-full"><thead class="bg-slate-50"><tr><th class="px-3 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Time</th>${header}</tr></thead><tbody>${body}</tbody></table></div>`;
+        document.getElementById('refresh-timetable').addEventListener('click', async () => { await refreshData(['slots', 'schedules']); renderTimetable(); });
+      }
+
+      async function renderConflicts() {
+        document.getElementById('content').innerHTML = '<p class="text-sm text-slate-500">Checking constraints…</p>';
+        try {
+          const result = await api('/schedules/conflicts');
+          const rows = result.conflicts.length ? result.conflicts.map(conflict => `<tr class="border-t border-slate-100"><td class="px-4 py-3 text-sm font-medium">${escapeHtml(conflict.type.replaceAll('_', ' '))}</td><td class="px-4 py-3 text-sm">${escapeHtml(conflict.schedule_ids.join(', '))}</td><td class="px-4 py-3 text-sm text-slate-600">${escapeHtml(conflict.detail)}</td></tr>`).join('') : '<tr><td colspan="3" class="p-8 text-center text-sm text-emerald-700">No timetable conflicts were found.</td></tr>';
+          document.getElementById('content').innerHTML = `<h2 class="mb-6 text-2xl font-bold">Constraint check</h2><div class="overflow-x-auto rounded-xl bg-white shadow-sm"><table class="min-w-full"><thead class="bg-slate-50"><tr><th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Type</th><th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Schedules</th><th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Detail</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+        } catch (error) { showNotice(error.message, 'error'); }
+      }
+
+      async function refreshData(keys) {
+        const loaders = {
+          users: () => api('/users'), courses: () => api('/courses'), rooms: () => api('/rooms'),
+          groups: () => api('/student-groups'), instructors: () => api('/instructors'), slots: () => api('/time-slots'), schedules: () => api('/schedules'),
+        };
+        const results = await Promise.all(keys.map(async key => [key, await loaders[key]()]));
+        for (const [key, data] of results) cachedData[key] = data;
+      }
+
+      function renderView() {
+        if (tokenPayload?.role !== 'admin') {
+          document.getElementById('content').innerHTML = '<div class="rounded-xl bg-white p-6 shadow-sm"><h2 class="text-xl font-bold">Administrator access required</h2><p class="mt-2 text-slate-600">This browser interface manages timetable data and is available to administrators.</p></div>';
+          return;
+        }
+        if (entityConfigs[activeView]) renderEntityView(activeView);
+        else if (activeView === 'generate') renderGenerateView();
+        else if (activeView === 'conflicts') renderConflicts();
+        else renderTimetable();
+      }
+
+      function logout(showLogin = true) {
+        localStorage.removeItem(TOKEN_KEY);
+        tokenPayload = null;
+        cachedData = {};
+        document.getElementById('app-view').classList.add('hidden');
+        if (showLogin) document.getElementById('login-view').classList.remove('hidden');
+      }
+
+      async function startApplication() {
+        document.getElementById('login-view').classList.add('hidden');
+        document.getElementById('app-view').classList.remove('hidden');
+        document.getElementById('identity').textContent = `${tokenPayload.email} · ${tokenPayload.role}`;
+        renderNavigation();
+        if (tokenPayload.role !== 'admin') { renderView(); return; }
+        try {
+          await refreshData(['users', 'courses', 'rooms', 'groups', 'instructors', 'slots', 'schedules']);
+          renderView();
+        } catch (error) { showNotice(error.message, 'error'); }
+      }
+
+      document.getElementById('login-form').addEventListener('submit', async event => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const error = document.getElementById('login-error');
+        error.classList.add('hidden');
+        try {
+          const result = await fetch(`${API_BASE}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: form.email.value, password: form.password.value }) });
+          const payload = await result.json();
+          if (!result.ok) throw new Error(payload.detail || 'Unable to sign in');
+          tokenPayload = decodeJwt(payload.access_token);
+          localStorage.setItem(TOKEN_KEY, payload.access_token);
+          await startApplication();
+        } catch (exception) { error.textContent = exception.message; error.classList.remove('hidden'); }
+      });
+
+      document.getElementById('logout-button').addEventListener('click', () => logout());
+      const savedToken = tokenFromStorage();
+      if (savedToken) {
+        try { tokenPayload = decodeJwt(savedToken); startApplication(); }
+        catch (exception) { logout(); }
+      }
+    </script>
+  </body>
+</html>
