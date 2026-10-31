@@ -1,0 +1,67 @@
+# Preserve the existing exclusion of development-only content
+.env
+.venv
+__pycache__
+.pytest_cache
+node_modules
+docs
+tests
+.git
+
+# All environment / credential files (including nested copies)
+.env.*
+*.env
+*.env.*
+**/.env
+**/.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+
+# Database dumps and locally exported records
+*.dump
+**/*.dump
+*.backup
+**/*.backup
+*.bak
+**/*.bak
+*.sql.gz
+**/*.sql.gz
+*.sqlite
+*.sqlite3
+backups
+db-backups
+**/backups
+**/db-backups
+
+# Prior HTML copies (keep the live index.html)
+index.before-*.html
+**/index.before-*.html
+
+# Archives can include database data or secrets
+*.rar
+**/*.rar
+*.zip
+**/*.zip
+*.7z
+**/*.7z
+*.tar
+**/*.tar
+*.tar.gz
+**/*.tar.gz
+*.tgz
+**/*.tgz
+
+# Generated/local artifacts; the runtime uses CSS embedded in index.html
+styles.generated.css
+playwright-report
+test-results
+coverage
+*.log
+*.tmp
+*.temp
+.vscode
+.idea

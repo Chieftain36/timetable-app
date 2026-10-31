@@ -101,6 +101,7 @@ def generate_schedule_matrix(
     rooms: Iterable[Mapping[str, Any] | object],
     time_slots: Iterable[Mapping[str, Any] | object],
     existing_entries: Iterable[Mapping[str, Any] | object] = (),
+    availability: Iterable[Mapping[str, Any] | object] = (),
 ) -> list[dict[str, Any]]:
     """Generate a reproducible set of non-conflicting schedule entries.
 
@@ -111,9 +112,13 @@ def generate_schedule_matrix(
     """
     group_map = {
         _identity(_value(group, "id")): group
-        for group in groups
+        for group in groups if bool(_value(group, "is_active", True))
     }
-    instructor_ids = {_identity(_value(instructor, "id")) for instructor in instructors}
+    instructor_map = {_identity(_value(row, "id")): row for row in instructors if bool(_value(row, "is_active", True))}
+    instructor_ids = set(instructor_map)
+    preferences = {(_identity(_value(row, "instructor_id")), _identity(_value(row, "time_slot_id"))):
+                   _value(row, "status", "available" if _value(row, "is_available", True) else "unavailable")
+                   for row in availability}
     available_rooms = sorted(
         (
             room
@@ -127,7 +132,8 @@ def generate_schedule_matrix(
             _identity(_value(room, "id")),
         ),
     )
-    ordered_slots = sorted(time_slots, key=_slot_sort_key)
+    ordered_slots = sorted((slot for slot in time_slots if bool(_value(slot, "is_active", True))
+                            and 1 <= int(_value(slot, "day_of_week")) <= 6), key=_slot_sort_key)
     if not ordered_slots:
         raise SchedulingError(
             [{"course_id": "unknown", "group_id": "unknown", "reason": "No time slots exist"}]
@@ -143,6 +149,8 @@ def generate_schedule_matrix(
             "course_id": course_id,
             "group_id": group_id,
             "instructor_id": instructor_id,
+            "session_minutes": _value(requirement, "session_minutes"),
+            "course_max_hours": _value(requirement, "course_max_hours", 168),
         }
         group = group_map.get(_identity(group_id))
         if course_id is None or group is None or _identity(instructor_id) not in instructor_ids:
@@ -208,7 +216,27 @@ def generate_schedule_matrix(
     unscheduled: list[dict[str, Any]] = []
     for requirement in expanded_requirements:
         placed: dict[str, Any] | None = None
-        for slot in ordered_slots:
+        instructor_key = _identity(requirement["instructor_id"])
+        def duration(entry):
+            start = _as_time(_value(entry, "start_time"))
+            end = _as_time(_value(entry, "end_time"))
+            if start is None or end is None:
+                raise ValueError("Workload accounting requires the time range of every existing entry")
+            return ((end.hour-start.hour)*3600 + (end.minute-start.minute)*60 + end.second-start.second)/60
+
+        instructor_minutes = sum(duration(row) for row in assignments if _identity(row["instructor_id"]) == instructor_key)
+        course_minutes = sum(duration(row) for row in assignments if row["course_id"] == requirement["course_id"] and row["group_id"] == requirement["group_id"])
+        preferred_slots = sorted(ordered_slots, key=lambda slot: preferences.get((instructor_key, _identity(_value(slot, "id")))) != "preferred")
+        for slot in preferred_slots:
+            if preferences.get((instructor_key, _identity(_value(slot, "id")))) == "unavailable":
+                continue
+            minutes = duration(slot)
+            if requirement["session_minutes"] is not None and minutes != requirement["session_minutes"]:
+                continue
+            if instructor_minutes + minutes > (_value(instructor_map[instructor_key], "max_weekly_minutes") or int(_value(instructor_map[instructor_key], "max_hours", 168)) * 60):
+                continue
+            if course_minutes + minutes > requirement["course_max_hours"] * 60:
+                continue
             for room in requirement["candidate_rooms"]:
                 candidate = {
                     "course_id": requirement["course_id"],
@@ -231,7 +259,7 @@ def generate_schedule_matrix(
                     "course_id": requirement["course_id"],
                     "group_id": requirement["group_id"],
                     "instructor_id": requirement["instructor_id"],
-                    "reason": "All eligible rooms and time slots are occupied",
+                    "reason": "No slot satisfies occupancy, availability, duration and workload limits",
                 }
             )
             continue

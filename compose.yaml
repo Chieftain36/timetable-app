@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: timetable
+      POSTGRES_USER: timetable
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run start.ps1 first}
+    volumes:
+      - timetable-data:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U timetable -d timetable"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  app:
+    build: .
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      DATABASE_URL: postgresql://timetable:${POSTGRES_PASSWORD}@db:5432/timetable
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?Run start.ps1 first}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:?Run start.ps1 first}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:?Run start.ps1 first}
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  timetable-data:

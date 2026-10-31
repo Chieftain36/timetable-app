@@ -1,0 +1,13 @@
+{
+  "name": "timetable-ui-checks",
+  "private": true,
+  "scripts": {
+    "test": "node tests/prepare.cjs && node tests/check_input.cjs && node tests/check_frontend.cjs && node tests/test_sprint2.cjs && node tests/test_login.cjs && node tests/test_slots.cjs && node tests/test_instructor_picker.cjs && node tests/test_users.cjs && node tests/test_manual.cjs && node tests/test_catalog.cjs",
+    "build:css": "tailwindcss -i styles.input.css -o styles.generated.css --minify && node tests/embed_styles.cjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.0",
+    "tailwindcss": "4.3.3",
+    "@tailwindcss/cli": "4.3.3"
+  }
+}
