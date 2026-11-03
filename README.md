@@ -9,6 +9,8 @@ This archive contains separate source files, tests, schema and launch scripts.
 not sufficient. Follow [the Sprint 4–5 upgrade guide](docs/SPRINT4_5.md#upgrade-an-existing-installation). Keep your existing .env and database.
 Do not use the older version-specific update instructions from previous releases.
 
+Latest test evidence: [Sprints 1–5 verification report (Russian)](docs/SPRINTS_1_5_VERIFICATION_RU.md).
+
 ## First installation
 
 Start Docker Desktop with Linux containers, extract this archive, and open
@@ -57,7 +59,7 @@ Select Room type, Building and Room number; enter Capacity.
   Examples: D101–D112, D201–D212, D301–D312, through I312.
   Capacity: a whole number from 5 to 25 inclusive.
 - Lecture: blocks A–D, floors 1–2. Valid names: A1, A2, B1, B2, C1, C2, D1, D2.
-  Capacity: a whole number from 1 to 100 inclusive.
+  Capacity: a whole number from 1 to 70 inclusive.
 
 The API and PostgreSQL enforce these combinations. Existing unclassified rooms
 remain stored and usable; migration does not rename them or change capacities.

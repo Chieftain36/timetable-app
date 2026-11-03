@@ -1,0 +1,15 @@
+
+> test
+> node tests/prepare.cjs && node tests/check_input.cjs && node tests/check_frontend.cjs && node tests/test_sprint2.cjs && node tests/test_login.cjs && node tests/test_slots.cjs && node tests/test_instructor_picker.cjs && node tests/test_users.cjs && node tests/test_manual.cjs && node tests/test_catalog.cjs && node tests/test_generation_security.cjs && node tests/test_planning.cjs
+
+Frontend validation: allowed/disallowed text, integers, safe toast text and server error statuses passed.
+Frontend checks passed: batch/single fetch, double-click guard, cache update, error retention and retry controls.
+PASS: Chromium UI: confirmation/cancel/retry, bulk creation, overlap/Sunday/year/activity guards, matrix cycle/minimum hours, failed save retention, successful save.
+PASS: English login errors with Russian browser locale, password toggle and mobile width.
+PASS: slot edit/prefill/overlap, deletion cancel/409/retry/204, dynamic rows, filters and mobile dialog.
+PASS: instructor email picker excludes admin/linked users, submits real ID, and disables empty form.
+PASS: user email/role/password editing, unchanged password omission, validation, delete cancel/409/retry and dynamic refresh.
+PASS: room selectors/capacity ranges; manual class create/edit, error retention, dynamic timetable and mobile form.
+PASS catalog edit/delete, cancellation, dependency errors, room defaults and integrated grid.
+PASS: replacement warning/count, cancellation, double-submit guard, confirmed payload, failed-save retention/retry, responsive light/dark generation form (mock API only).
+PASS Sprint 4–5 UI: admin generation/settings/reset/errors/score, publish confirmation, locks, AND filters/search, week navigation, personal isolation, instructor availability and responsive light/dark forms (mock APIs).

@@ -234,8 +234,14 @@ async def test_live_browser_generation_publication_and_personal_views(live_plann
     import subprocess
     import sys
     import httpx
+    import secrets
+    from auth import hash_password
 
     d = live_planning
+    browser_password = secrets.token_urlsafe(24)
+    browser_hash = hash_password(browser_password)
+    for role in ('admin', 'teacher', 'student'):
+        await d['c'].execute('UPDATE users SET password_hash=$1 WHERE id=$2', browser_hash, d['ids'][role])
     with socket.socket() as probe:
         probe.bind(('127.0.0.1', 0))
         port = probe.getsockname()[1]
@@ -246,6 +252,7 @@ async def test_live_browser_generation_publication_and_personal_views(live_plann
     env.pop('BOOTSTRAP_ADMIN_PASSWORD', None)
     env['PLANNING_TEST_BASE'] = f'http://127.0.0.1:{port}'
     env['PLANNING_TEST_HEADERS'] = json.dumps(d['headers'])
+    env['PLANNING_TEST_PASSWORD'] = browser_password
     server = subprocess.Popen([sys.executable, '-m', 'uvicorn', 'main:app', '--host', '127.0.0.1', '--port', str(port)],
                                env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     try:
