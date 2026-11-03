@@ -880,12 +880,21 @@ async def delete_schedule(
 
 @app.get("/api/v1/schedules", response_model=list[ScheduleRead])
 async def list_schedules(
-    _: AuthenticatedUser,
+    user: AuthenticatedUser,
     connection: DbConnection,
     group_id: UUID | None = Query(default=None),
     room_id: UUID | None = Query(default=None),
     instructor_id: UUID | None = Query(default=None),
 ) -> list[ScheduleRead]:
+    if user.role != UserRole.ADMIN:
+        if user.role != UserRole.INSTRUCTOR:
+            # Student membership is not modeled yet; caller-provided filters
+            # must never substitute for a server-authorized group membership.
+            raise HTTPException(403, "Personal student timetables are not available")
+        own_instructor_id = await _availability_owner(connection, user)
+        if instructor_id is not None and instructor_id != own_instructor_id:
+            raise HTTPException(403, "You cannot view another instructor's timetable")
+        instructor_id = own_instructor_id
     filters: list[str] = []
     values: list[UUID] = []
     for column, value in (

@@ -19,5 +19,4 @@ if (-not (Test-Path -LiteralPath '.env')) {
 docker compose up --build -d
 if ($LASTEXITCODE -ne 0) { throw 'Startup failed. Run: docker compose logs' }
 Write-Host 'Open http://localhost:8000 after the application has started.'
-Write-Host 'Administrator credentials (also saved in .env):'
-Get-Content -LiteralPath '.env' | Where-Object { $_ -match '^BOOTSTRAP_ADMIN_(EMAIL|PASSWORD)=' }
+Write-Host 'Administrator credentials are stored privately in .env. Do not share or commit this file.'

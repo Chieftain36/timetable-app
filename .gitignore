@@ -63,3 +63,6 @@ yarn-error.log*
 .idea/
 .DS_Store
 Thumbs.db
+
+# Extracted frontend used by local Node checks
+/tests/frontend.js
