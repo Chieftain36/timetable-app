@@ -40,6 +40,11 @@ def security_db(monkeypatch):
                         instructor_email='synthetic@example.com', day_of_week=1,
                         start_time=time(9), end_time=time(10))
 
+        async def fetchrow(self, query, *values):
+            assert query == 'SELECT id, email, role FROM users WHERE id = $1'
+            roles = {UUID(int=100): 'admin', UUID(int=1): 'instructor', UUID(int=200): 'student'}
+            return dict(id=values[0], email='audit@example.com', role=roles[values[0]])
+
         async def fetch(self, query, *values):
             if 'FROM instructors WHERE user_id = $1' in query:
                 return [dict(id=self.owner, is_active=self.active)] if self.profile_exists else []
@@ -60,7 +65,8 @@ def security_db(monkeypatch):
 
 
 def authorization(role):
-    user = CurrentUser(id=UUID(int=1), email='audit@example.com', role=role)
+    identifier = {'admin': 100, 'instructor': 1, 'student': 200}[role]
+    user = CurrentUser(id=UUID(int=identifier), email='audit@example.com', role=role)
     return {'Authorization': 'Bearer ' + create_access_token(user)}
 
 
@@ -180,8 +186,11 @@ async def test_live_postgres_schedule_ownership(monkeypatch):
         await connection.execute(f'CREATE SCHEMA {schema}')
         await connection.execute(f'SET search_path TO {schema}, public')
         await connection.execute(Path('schema.sql').read_text())
-        for user_id, email in [(UUID(int=1), 'owner@example.com'), (UUID(int=10), 'other@example.com')]:
-            await connection.execute("INSERT INTO users (id,email,password_hash,role) VALUES ($1,$2,'unused-test-hash','instructor')", user_id, email)
+        for user_id, email, role in [(UUID(int=1), 'owner@example.com', 'instructor'),
+                                    (UUID(int=10), 'other@example.com', 'instructor'),
+                                    (UUID(int=100), 'admin@example.com', 'admin'),
+                                    (UUID(int=200), 'student@example.com', 'student')]:
+            await connection.execute("INSERT INTO users (id,email,password_hash,role) VALUES ($1,$2,'unused-test-hash',$3)", user_id, email, role)
         for identifier, user_id in [(UUID(int=2), UUID(int=1)), (UUID(int=3), UUID(int=10))]:
             await connection.execute("INSERT INTO instructors (id,user_id,department) VALUES ($1,$2,'Test')", identifier, user_id)
         course = await connection.fetchval("INSERT INTO courses(code,name) VALUES ('TEST','Synthetic course') RETURNING id")
@@ -193,15 +202,20 @@ async def test_live_postgres_schedule_ownership(monkeypatch):
         async def override():
             yield connection
         app.dependency_overrides[get_connection] = override
+        def live_authorization(role):
+            identifiers = {'admin': 100, 'instructor': 1, 'student': 200}
+            emails = {'admin': 'admin@example.com', 'instructor': 'owner@example.com', 'student': 'student@example.com'}
+            user = CurrentUser(id=UUID(int=identifiers[role]), email=emails[role], role=role)
+            return {'Authorization': 'Bearer ' + create_access_token(user)}
         async with AsyncClient(transport=ASGITransport(app=app), base_url='http://test') as client:
-            own = await client.get('/api/v1/schedules', headers=authorization('instructor'))
+            own = await client.get('/api/v1/schedules', headers=live_authorization('instructor'))
             assert own.status_code == 200, own.text
             assert [row['instructor_id'] for row in own.json()] == [str(UUID(int=2))]
-            cross = await client.get('/api/v1/schedules', params={'instructor_id': str(UUID(int=3))}, headers=authorization('instructor'))
+            cross = await client.get('/api/v1/schedules', params={'instructor_id': str(UUID(int=3))}, headers=live_authorization('instructor'))
             assert cross.status_code == 403
-            student = await client.get('/api/v1/schedules', params={'group_id': str(group)}, headers=authorization('student'))
+            student = await client.get('/api/v1/schedules', params={'group_id': str(group)}, headers=live_authorization('student'))
             assert student.status_code == 403
-            all_rows = await client.get('/api/v1/schedules', headers=authorization('admin'))
+            all_rows = await client.get('/api/v1/schedules', headers=live_authorization('admin'))
             assert all_rows.status_code == 200
             assert len(all_rows.json()) == 2
     finally:

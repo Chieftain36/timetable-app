@@ -73,6 +73,13 @@ class FakeConnection:
         if where:
             column, index = where.groups()
             rows = [row for row in rows if row[column] == args[int(index)-1]]
+        excluded = re.search(r"AND id <> \$(\d+)", query)
+        if excluded:
+            rows = [row for row in rows if row['id'] != args[int(excluded.group(1))-1]]
+        projection = re.match(r"\s*SELECT ([\w, ]+) FROM", query)
+        if projection and projection.group(1) != '1':
+            columns = [column.strip() for column in projection.group(1).split(',')]
+            rows = [{column: row[column] for column in columns} for row in rows]
         return deepcopy(rows)
 
     def insert(self, query, args):
@@ -83,7 +90,7 @@ class FakeConnection:
         defaults = {
             'courses': {'description': None, 'is_active': True, 'max_hours': 40},
             'student_groups': {'is_active': True},
-            'instructors': {'is_active': True, 'max_hours': 40, 'max_unavailable_slots': 10, 'availability_deadline': None, 'title': None},
+            'instructors': {'is_active': True, 'max_hours': 40, 'max_unavailable_slots': 10, 'availability_deadline': None, 'title': None, 'max_weekly_minutes': None},
             'time_slots': {'is_active': True},
             'schedules': {'created_at': datetime.now(timezone.utc)},
         }
@@ -117,7 +124,9 @@ class FakeConnection:
                 updated[column] = args[int(index)-1]
             self.validate_unique(table, updated)
             row.update(updated)
-            return deepcopy(row)
+            returning = query.split(' RETURNING ')[1]
+            result = row if returning == '*' else {key.strip(): row[key.strip()] for key in returning.split(',')}
+            return deepcopy(result)
         rows = self.select(query, args)
         return rows[0] if rows else None
 
@@ -289,7 +298,7 @@ def seed_sprint2(database):
     teacher_user = {**database.users['student@example.com'], 'id': uuid4(), 'email': 'teacher@example.com', 'role': 'instructor'}
     database.users[teacher_user['email']] = teacher_user
     teacher = dict(id=uuid4(), user_id=teacher_user['id'], department='IT', title=None,
-                   is_active=True, max_hours=40, max_unavailable_slots=2, availability_deadline=None)
+                   is_active=True, max_hours=40, max_unavailable_slots=2, availability_deadline=None, max_weekly_minutes=None)
     group = dict(id=uuid4(), name='CS-101', academic_year='2026-2027', student_count=20, is_active=True)
     course = dict(id=uuid4(), code='CS-1', name='Math', description=None, is_active=True, max_hours=40)
     room = dict(id=uuid4(), name='101', building='A', capacity=30, is_active=True)

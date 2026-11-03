@@ -160,3 +160,8 @@ are admin-wide or scoped to an active instructor's own profile. Students cannot
 read schedules until authorized group membership is implemented. Generation
 saves immediately; replacing entries requires confirmation and has no undo.
 The UI does not implement persistent draft/publication states.
+
+Protected requests also verify the current persisted account identity. Deleted
+accounts and tokens whose role/email no longer matches return 401; the last
+administrator cannot be demoted. See [authorization lifecycle](docs/CURRENT_USER_AUTHORIZATION.md)
+for session-revocation limits and concurrency tests.

@@ -52,7 +52,7 @@ Browser tests use intercepted synthetic HTTP responses, not a production server.
 
 ## Remaining limits and follow-up
 
-- JWT role claims still last until expiry; immediate revocation and last-admin protections remain a separate P1 change. No account/credential rotation was performed.
+- This document records the `d45c676` baseline. The follow-up [current-user authorization change](CURRENT_USER_AUTHORIZATION.md) adds persisted role/email checks and last-admin protection; it does not implement a permanent token blacklist or password-change session revocation. No account/credential rotation was performed.
 - Delivery-mode/room-type compatibility, instructor availability navigation, publication/drafts/versioning and mobile focus issues remain as recorded in the audit.
 - The generation confirmation is a safeguard, not a server-enforced optimistic concurrency check or recovery mechanism. Another admin can change data after the displayed count is read.
 - PostgreSQL verification must distinguish the real integration tests from fake transaction tests. Fake rollback confirms application control flow, not database guarantees by itself.
