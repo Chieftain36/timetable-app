@@ -151,3 +151,17 @@ Use docker compose down to stop while retaining the data volume; never use
 ## Version 2.5
 
 Courses, Rooms and Student groups now have Edit and Delete actions with confirmation and inline server errors. Referenced records cannot be deleted. Room forms default to 25 seats for practical rooms (5�25 allowed) and 70 for lecture rooms (1�70 allowed). Existing values are preserved when opening Edit. Unclassified legacy rooms require an explicit type selection. Build class grid is inside Add a time slot, before the slot library. Session changes clear stale notices.
+
+## Security and restored regression checks
+
+See [Security safeguards and test setup](docs/SECURITY_AND_TESTS.md) for the
+restored test sources and safe disposable-database instructions. Schedule reads
+are admin-wide or scoped to an active instructor's own profile. Students cannot
+read schedules until authorized group membership is implemented. Generation
+saves immediately; replacing entries requires confirmation and has no undo.
+The UI does not implement persistent draft/publication states.
+
+Protected requests also verify the current persisted account identity. Deleted
+accounts and tokens whose role/email no longer matches return 401; the last
+administrator cannot be demoted. See [authorization lifecycle](docs/CURRENT_USER_AUTHORIZATION.md)
+for session-revocation limits and concurrency tests.

@@ -15,6 +15,7 @@ from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from auth import create_access_token, get_current_user, hash_password, require_roles, verify_password
+from database import DbConnection, get_connection
 from models import (
     ScheduleDraft, ScheduleUpdate, ManualScheduleRead,
     AvailabilityEntry, AvailabilityStatus, AvailabilityRead, AvailabilityWrite,
@@ -161,25 +162,6 @@ async def request_validation_handler(request: Request, exc: RequestValidationErr
     return JSONResponse(status_code=422, content={"detail": detail})
 
 
-async def get_connection(request: Request) -> AsyncIterator[asyncpg.Connection]:
-    pool: asyncpg.Pool | None = getattr(request.app.state, "pool", None)
-    if pool is None:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Database is not ready",
-        )
-    async with pool.acquire() as connection:
-        # Serialize domain writes across workers, including generation and deactivation.
-        # READ COMMITTED reads after the lock see the preceding writer's committed state.
-        if request.method in {"POST", "PUT", "PATCH", "DELETE"} and not request.url.path.endswith("/auth/login"):
-            async with connection.transaction():
-                await connection.execute("SELECT pg_advisory_xact_lock(20261005)")
-                yield connection
-        else:
-            yield connection
-
-
-DbConnection = Annotated[asyncpg.Connection, Depends(get_connection, scope="function")]
 AdminUser = Annotated[CurrentUser, Depends(require_roles([UserRole.ADMIN]))]
 AuthenticatedUser = Annotated[CurrentUser, Depends(get_current_user)]
 
@@ -335,6 +317,15 @@ async def update_user(
         changes["password_hash"] = hash_password(changes.pop("password"))
     if "role" in changes:
         new_role = changes["role"]
+        if new_role != UserRole.ADMIN:
+            current = await _row(connection, "users", user_id)
+            if current["role"] == UserRole.ADMIN:
+                other_admin = await connection.fetchval(
+                    "SELECT 1 FROM users WHERE role = $1 AND id <> $2",
+                    UserRole.ADMIN.value, user_id,
+                )
+                if not other_admin:
+                    raise HTTPException(409, "The last administrator must keep the administrator role")
         if new_role != UserRole.INSTRUCTOR:
             has_profile = await connection.fetchval(
                 "SELECT 1 FROM instructors WHERE user_id = $1", user_id
@@ -880,12 +871,21 @@ async def delete_schedule(
 
 @app.get("/api/v1/schedules", response_model=list[ScheduleRead])
 async def list_schedules(
-    _: AuthenticatedUser,
+    user: AuthenticatedUser,
     connection: DbConnection,
     group_id: UUID | None = Query(default=None),
     room_id: UUID | None = Query(default=None),
     instructor_id: UUID | None = Query(default=None),
 ) -> list[ScheduleRead]:
+    if user.role != UserRole.ADMIN:
+        if user.role != UserRole.INSTRUCTOR:
+            # Student membership is not modeled yet; caller-provided filters
+            # must never substitute for a server-authorized group membership.
+            raise HTTPException(403, "Personal student timetables are not available")
+        own_instructor_id = await _availability_owner(connection, user)
+        if instructor_id is not None and instructor_id != own_instructor_id:
+            raise HTTPException(403, "You cannot view another instructor's timetable")
+        instructor_id = own_instructor_id
     filters: list[str] = []
     values: list[UUID] = []
     for column, value in (

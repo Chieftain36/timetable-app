@@ -11,6 +11,7 @@ from passlib.context import CryptContext
 from pydantic import BaseModel, EmailStr, ValidationError
 
 from models import CurrentUser, UserRole
+from database import DbConnection
 
 
 JWT_ALGORITHM = "HS256"
@@ -74,10 +75,10 @@ def _credentials_error() -> HTTPException:
     )
 
 
-def get_current_user(
+def _validated_token_user(
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
 ) -> CurrentUser:
-    """Validate a bearer token and expose its authenticated user identity and role."""
+    """Reject invalid credentials before acquiring a database connection."""
     if credentials is None or credentials.scheme.lower() != "bearer":
         raise _credentials_error()
 
@@ -86,12 +87,33 @@ def get_current_user(
             credentials.credentials,
             _jwt_secret(),
             algorithms=[JWT_ALGORITHM],
+            options={"require": ["exp", "iat"]},
         )
         token = TokenPayload.model_validate(payload)
     except (jwt.InvalidTokenError, ValidationError, ValueError):
         raise _credentials_error() from None
 
     return CurrentUser(id=token.sub, email=token.email, role=token.role)
+
+
+async def get_current_user(
+    token_user: Annotated[CurrentUser, Depends(_validated_token_user)],
+    connection: DbConnection,
+) -> CurrentUser:
+    """Require an existing account whose identity still matches the token.
+
+    Mutation requests share the route's transaction/advisory lock, so a role
+    change committed by the previous writer is checked before any new write.
+    """
+    record = await connection.fetchrow(
+        "SELECT id, email, role FROM users WHERE id = $1", token_user.id
+    )
+    if record is None:
+        raise _credentials_error()
+    current = CurrentUser.model_validate(dict(record))
+    if current.role != token_user.role or current.email != token_user.email:
+        raise _credentials_error()
+    return current
 
 
 def require_roles(roles: Sequence[UserRole | str]):

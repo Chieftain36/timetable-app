@@ -434,7 +434,7 @@ html[data-theme="dark"] .slot-dialog input,html[data-theme="dark"] .slot-dialog 
         document.getElementById('breadcrumb-page').textContent = title;
         document.getElementById('breadcrumb-group').textContent = group;
         document.getElementById('shell-page-title').textContent = title;
-        document.getElementById('shell-page-description').textContent = activeView === 'timetable' ? 'Review draft or published sessions by weekday, time, group, instructor and room.' : description;
+        document.getElementById('shell-page-description').textContent = activeView === 'timetable' ? 'Review recurring weekly sessions by weekday, time, group, instructor and room.' : description;
         const buttons = document.getElementById('shell-page-actions');
         buttons.innerHTML = activeView === 'timetable' ? `<button type="button" class="btn" id="go-to-slots" title="Open the existing time-slot manager">${stage2aIcon('calendar')} Import time slots</button><button type="button" class="btn primary" id="go-to-generate">${stage2aIcon('sparkles')} Generate timetable</button>` : '';
         document.getElementById('go-to-slots')?.addEventListener('click',()=>stage2aNavigate('slots'));
@@ -1386,12 +1386,19 @@ html[data-theme="dark"] .slot-dialog input,html[data-theme="dark"] .slot-dialog 
           <form id="generate-form" class="mt-6 space-y-4 rounded-xl bg-white p-5 shadow-sm">
             <label class="block text-sm font-medium">Assignments<textarea name="assignments" rows="8" required class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm" placeholder="course-id,group-id,instructor-id,1"></textarea></label>
             <label class="flex items-center gap-2 text-sm font-medium"><input name="replace_existing" type="checkbox" /> Replace all existing schedule entries</label>
+            <p class="text-sm text-slate-600">Generation saves classes immediately. This is not a preview. Replacing entries deletes the current schedule; no saved version or undo is available.</p>
             <button class="rounded-lg bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700">Generate automatic timetable</button>
           </form>
           <pre id="generation-result" class="mt-5 hidden overflow-x-auto rounded-xl bg-slate-900 p-4 text-sm text-slate-100"></pre></div>`;
         document.getElementById('generate-form').addEventListener('submit', async event => {
           event.preventDefault();
           const form = event.currentTarget;
+          if (form.dataset.busy) return;
+          const session = tokenFromStorage();
+          const replaceExisting = form.replace_existing.checked;
+          const submit = form.querySelector('button');
+          form.dataset.busy = '1';
+          submit.disabled = true;
           try {
             const assignments = form.assignments.value.trim().split(/\n+/).map((line, index) => {
               const values = line.split(',').map(value => value.trim());
@@ -1408,13 +1415,21 @@ html[data-theme="dark"] .slot-dialog input,html[data-theme="dark"] .slot-dialog 
               if ([group, instructor, course].some(row => row.is_active === false)) throw new Error('Cannot assign a class to an inactive course, group or instructor.');
               if (supportsRoute(SPRINT2_API.loads, 'post')) requireActiveAssignment(group, instructor, course);
             }
-            const result = await api('/schedules/generate', { method: 'POST', body: JSON.stringify({ assignments, replace_existing: form.replace_existing.checked }) });
+            if (replaceExisting) {
+              await refreshData(['schedules']);
+              if (!window.confirm(`Replace all ${cachedData.schedules.length} current schedule entries? Generation saves immediately and has no undo. Other administrators may have changed the schedule since this count was loaded.`)) return;
+            }
+            if (!session || session !== tokenFromStorage() || tokenPayload?.role !== 'admin') throw new Error('Your session has changed. Sign in again.');
+            const result = await api('/schedules/generate', { method: 'POST', body: JSON.stringify({ assignments, replace_existing: replaceExisting }) });
             const output = document.getElementById('generation-result');
-            output.textContent = JSON.stringify(result, null, 2);
-            output.classList.remove('hidden');
+            if (activeView === 'generate' && session === tokenFromStorage() && output) {
+              output.textContent = JSON.stringify(result, null, 2);
+              output.classList.remove('hidden');
+            }
             showNotice(`${result.generated_count} schedule entries generated.`);
             await refreshData(['slots', 'schedules']);
           } catch (error) { showNotice(error.message, 'error'); }
+          finally { delete form.dataset.busy; submit.disabled = false; }
         });
       }
 
