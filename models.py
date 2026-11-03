@@ -154,7 +154,11 @@ class CourseRead(ApiModel):
     description: str | None
 
 
+FeatureList = Annotated[list[Annotated[str, Field(pattern=r'^[a-z0-9][a-z0-9-]{0,49}$')]], Field(max_length=20)]
+
+
 class RoomCreate(TextInputModel):
+    features: FeatureList = Field(default_factory=list)
     room_type: Literal['practical', 'lecture'] = 'practical'
     name: Annotated[str, Field(min_length=1, max_length=120)]
     building: Annotated[str, Field(min_length=1, max_length=120)]
@@ -174,6 +178,7 @@ class RoomCreate(TextInputModel):
 
 
 class RoomUpdate(UpdateModel):
+    features: FeatureList | None = None
     room_type: Literal['practical', 'lecture'] | None = None
     name: Annotated[str | None, Field(min_length=1, max_length=120)] = None
     building: Annotated[str | None, Field(min_length=1, max_length=120)] = None
@@ -182,6 +187,7 @@ class RoomUpdate(UpdateModel):
 
 
 class RoomRead(ApiModel):
+    features: list[str] = Field(default_factory=list)
     room_type: str | None = None
     id: UUID
     name: str
@@ -346,6 +352,7 @@ class ScheduleUpdate(UpdateModel):
 
 
 class ManualScheduleRead(ScheduleDraft):
+    is_locked: bool = False
     id: UUID
     created_at: datetime
 
@@ -357,6 +364,7 @@ class ScheduleGenerationResponse(ApiModel):
 
 
 class ScheduleRead(ApiModel):
+    is_locked: bool = False
     id: UUID
     course_id: UUID
     room_id: UUID

@@ -40,7 +40,7 @@ See [safe test setup](SECURITY_AND_TESTS.md#run-safely) before setting `SPRINT2_
 
 Revert this commit to restore the prior dependencies; no schema rollback is required. That also removes the new current-account authorization and last-admin protection. Do not merge, deploy or alter account credentials as an implicit part of review.
 
-Room delivery-mode validation, instructor availability navigation, personal student membership, drafts/publication and design work remain separate audit items.
+At this authorization baseline those features were separate audit items. The later [Sprint 4–5 implementation](SPRINT4_5.md) adds room delivery-mode rules, instructor availability navigation, student membership and draft/publication workflows. A broad redesign remains separate.
 
 ## Verification outcome
 

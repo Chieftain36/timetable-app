@@ -4,6 +4,8 @@ Branch: `fix/security-and-regression-tests`, based on audit commit `698717f`.
 
 ## Scope
 
+This document records the earlier security baseline. The subsequent [Sprint 4–5 implementation](SPRINT4_5.md) adds membership and publication: personal reads now return authorized official snapshots, and an unlinked student receives an empty list.
+
 - `GET /api/v1/schedules`: admin retains global access and optional filters. An active instructor is restricted to the profile derived from the authenticated user; a different requested instructor returns 403. Students return 403 even with a group filter because no authorized student-group membership exists yet. This intentionally fails closed; it does not implement the missing student personal-timetable feature or enable personal UI.
 - `start.ps1` no longer reads credentials back into the console. Existing `.env` creation and preservation behavior is retained.
 - Generation says it saves immediately and has no preview, version or undo. Replacement fetches the current schedule count, requests explicit confirmation and warns the count can change. Cancellation sends no generation POST. The form prevents concurrent repeat submissions, keeps the confirmed replacement option, checks for a changed session, and restores controls after errors while retaining entered text.

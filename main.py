@@ -1,4 +1,5 @@
 import os
+import planning
 from datetime import datetime, timezone
 from collections.abc import AsyncIterator, Iterable
 from contextlib import asynccontextmanager
@@ -169,7 +170,7 @@ AuthenticatedUser = Annotated[CurrentUser, Depends(get_current_user)]
 SCHEDULE_SELECT = """
 SELECT
     s.id, s.course_id, s.room_id, s.instructor_id, s.group_id, s.time_slot_id,
-    s.created_at, c.code AS course_code, c.name AS course_name,
+    s.created_at, s.is_locked, c.code AS course_code, c.name AS course_name,
     r.name AS room_name, r.building AS room_building,
     g.name AS group_name, g.student_count,
     u.email AS instructor_email,
@@ -422,14 +423,14 @@ async def create_room(room: RoomCreate, _: AdminUser, connection: DbConnection) 
     try:
         record = await connection.fetchrow(
             """
-            INSERT INTO rooms (name, building, capacity, is_active, room_type)
-            VALUES ($1, $2, $3, $4, $5)
-            RETURNING id, name, building, capacity, is_active, room_type
+            INSERT INTO rooms (name, building, capacity, is_active, room_type, features)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING id, name, building, capacity, is_active, room_type, features
             """,
             room.name,
             room.building,
             room.capacity,
-            room.is_active, room.room_type,
+            room.is_active, room.room_type, room.features,
         )
     except asyncpg.UniqueViolationError:
         raise _conflict("A room with this name already exists in the building") from None
@@ -439,7 +440,7 @@ async def create_room(room: RoomCreate, _: AdminUser, connection: DbConnection) 
 @app.get("/api/v1/rooms", response_model=list[RoomRead])
 async def list_rooms(_: AdminUser, connection: DbConnection) -> list[RoomRead]:
     records = await connection.fetch(
-        "SELECT id, name, building, capacity, is_active, room_type FROM rooms ORDER BY building, name"
+        "SELECT id, name, building, capacity, is_active, room_type, features FROM rooms ORDER BY building, name"
     )
     return [RoomRead.model_validate(dict(record)) for record in records]
 
@@ -453,7 +454,7 @@ async def update_room(
 ) -> RoomRead:
     current = await _row(connection, "rooms", room_id)
     changes = update.model_dump(exclude_unset=True)
-    merged = {key: changes.get(key, current.get(key)) for key in RoomCreate.model_fields}
+    merged = {key: changes.get(key, current.get(key, [] if key == "features" else None)) for key in RoomCreate.model_fields}
     try:
         valid = RoomCreate.model_validate(merged)
     except ValidationError:
@@ -469,7 +470,7 @@ async def update_room(
             "rooms",
             room_id,
             valid.model_dump(),
-            "id, name, building, capacity, is_active, room_type",
+            "id, name, building, capacity, is_active, room_type, features",
         )
     except asyncpg.UniqueViolationError:
         raise _conflict("A room with this name already exists in the building") from None
@@ -765,8 +766,11 @@ async def generate_schedules(
         requirement["course_max_hours"] = course["max_hours"]
     slots_by_id = {row["id"]: row for row in time_slots}
     existing_entries = []
+    current_schedules = await connection.fetch("SELECT * FROM schedules")
+    if request_data.replace_existing and any(row.get("is_locked", False) for row in current_schedules):
+        raise HTTPException(409, "Use the planning generator to preserve locked classes")
     if not request_data.replace_existing:
-        for row in await connection.fetch("SELECT * FROM schedules"):
+        for row in current_schedules:
             slot = slots_by_id[row["time_slot_id"]]
             existing_entries.append({**dict(row), "day_of_week": slot["day_of_week"],
                                      "start_time": slot["start_time"], "end_time": slot["end_time"]})
@@ -832,6 +836,10 @@ async def _delete_schedules(
     identifiers = list(dict.fromkeys(schedule_ids))
     try:
         async with connection.transaction():
+            locked = [row for row in await connection.fetch('SELECT * FROM schedules')
+                      if row['id'] in identifiers and row.get('is_locked', False)]
+            if locked:
+                raise HTTPException(409, 'Unlock selected classes before deleting them')
             # Child tables, if introduced, must reference schedules(id) ON DELETE CASCADE.
             # The current schema has no child tables; reference data is preserved.
             records = await connection.fetch(
@@ -878,14 +886,12 @@ async def list_schedules(
     instructor_id: UUID | None = Query(default=None),
 ) -> list[ScheduleRead]:
     if user.role != UserRole.ADMIN:
-        if user.role != UserRole.INSTRUCTOR:
-            # Student membership is not modeled yet; caller-provided filters
-            # must never substitute for a server-authorized group membership.
-            raise HTTPException(403, "Personal student timetables are not available")
-        own_instructor_id = await _availability_owner(connection, user)
-        if instructor_id is not None and instructor_id != own_instructor_id:
-            raise HTTPException(403, "You cannot view another instructor's timetable")
-        instructor_id = own_instructor_id
+        if user.role == UserRole.INSTRUCTOR:
+            own_id = await _availability_owner(connection, user)
+            if instructor_id is not None and instructor_id != own_id:
+                raise HTTPException(403, "You cannot view another instructor's timetable")
+        return await planning.read_timetable(connection, user, 'published',
+            group_id=group_id, room_id=room_id, instructor_id=instructor_id)
     filters: list[str] = []
     values: list[UUID] = []
     for column, value in (
@@ -1171,6 +1177,7 @@ async def _validate_manual_schedule(connection, data: ScheduleDraft, exclude_id:
     slot = await _row(connection, 'time_slots', data.time_slot_id)
     if not all(row['is_active'] for row in (course, room, instructor, group, slot)) or slot['day_of_week'] > 6:
         raise HTTPException(409, 'Course, room, instructor, group and time slot must be active; Sundays are not allowed')
+    await planning.room_rule_check(connection, data, dict(room))
     if room['capacity'] < group['student_count']:
         raise HTTPException(409, 'Room capacity is below the group size')
     availability = await connection.fetch('SELECT * FROM instructor_availability WHERE instructor_id = $1', data.instructor_id)
@@ -1208,6 +1215,8 @@ async def create_manual_schedule(payload: ScheduleDraft, _: AdminUser, connectio
 @app.patch('/api/v1/schedules/{schedule_id}', response_model=ManualScheduleRead)
 async def update_manual_schedule(schedule_id: UUID, payload: ScheduleUpdate, _: AdminUser, connection: DbConnection):
     current = await _row(connection, 'schedules', schedule_id)
+    if current.get('is_locked', False):
+        raise HTTPException(409, 'Unlock this class before editing it')
     changes = payload.model_dump(exclude_unset=True)
     merged = ScheduleDraft(**{key: changes.get(key, current[key]) for key in ScheduleDraft.model_fields})
     await _validate_manual_schedule(connection, merged, schedule_id)
@@ -1215,3 +1224,6 @@ async def update_manual_schedule(schedule_id: UUID, payload: ScheduleUpdate, _: 
         return await _update_by_id(connection, 'schedules', schedule_id, changes, '*')
     except asyncpg.UniqueViolationError:
         raise HTTPException(409, 'Room, instructor or group already has a class in this slot') from None
+
+
+app.include_router(planning.router)

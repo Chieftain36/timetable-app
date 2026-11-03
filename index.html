@@ -307,7 +307,21 @@ html[data-theme="dark"] .slot-dialog input,html[data-theme="dark"] .slot-dialog 
 @media(min-width:761px){#app-view.utt-is-collapsed .brand-toggle{margin-inline:auto}}
 @media(max-width:760px){#app-view .sidebar{overflow:hidden;}#app-view #navigation{overflow-y:auto!important}}
 </style>
-</head>
+<style>
+.planning-banner{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:28px 32px;margin-bottom:22px;border:1px solid var(--border);border-radius:24px;background:linear-gradient(120deg,var(--surface3),var(--surface));color:var(--ink)}
+.planning-banner h2{font-size:30px;letter-spacing:-.8px;margin:8px 0}.planning-banner p{color:var(--muted);max-width:720px;margin:8px 0 18px}.planning-banner-icon{width:100px;height:100px;border-radius:28px;display:grid;place-items:center;background:var(--violet-soft);color:var(--violet);flex-shrink:0}.planning-banner-icon svg{width:52px;height:52px}
+.planning-badge{display:inline-flex;border:1px solid var(--border);background:var(--surface2);color:var(--muted);border-radius:8px;font-size:12px;padding:6px 10px}.planning-toolbar,.planning-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.planning-toolbar{margin:18px 0}.planning-count{margin-left:auto;color:var(--muted)}.planning-card{padding:24px;margin:20px 0;background:var(--surface);border:1px solid var(--border);border-radius:20px;color:var(--ink);min-width:0}.planning-card h3{font-size:20px;margin:8px 0 16px}.planning-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.planning-grid .planning-card{margin:0}.planning-helper{color:var(--muted);font-size:13px;line-height:1.7;margin:14px 0}.planning-filters{display:grid;grid-template-columns:1.5fr repeat(4,1fr) auto;gap:12px;align-items:end}.planning-filters label,.planning-field,.planning-assignment label,.planning-link-form label{display:grid;gap:8px;font-size:13px;font-weight:600;min-width:0}.planning-field{margin:14px 0}.planning-filters input,.planning-filters select,.planning-field input,.planning-field select,.planning-assignment input,.planning-assignment select,.planning-link-form select{width:100%;min-width:0;height:44px;padding:9px 12px;color:var(--ink);background:var(--input,var(--surface2));border:1px solid var(--border);border-radius:10px}.planning-check{display:flex;align-items:center;gap:10px;margin:18px 0;font-size:14px}.planning-check input{width:18px;height:18px;accent-color:var(--violet)}.planning-rule-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}.planning-section-title{display:flex;justify-content:space-between;align-items:center;gap:16px}.planning-section-title span{color:var(--muted);font-size:13px}.planning-table-wrap{overflow:auto}.planning-table{width:100%;border-collapse:collapse;text-align:left}.planning-table th{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);padding:12px;border-bottom:1px solid var(--border)}.planning-table td{padding:14px 12px;border-bottom:1px solid var(--border);font-size:13px}.planning-table small{display:block;color:var(--muted);margin-top:5px}.planning-empty{text-align:center;padding:35px;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:18px;margin:20px 0}.planning-empty>svg{margin:auto;width:36px;height:36px;color:var(--violet)}.planning-notice{white-space:pre-wrap;padding:16px 20px;border:1px solid var(--border);border-radius:12px;margin:16px 0;background:var(--violet-soft);color:var(--ink)}.planning-notice.error{background:color-mix(in srgb,#b44262 18%,var(--surface));border-color:#a74c65;color:var(--ink)}.planning-dialog{width:min(540px,calc(100vw - 32px));padding:30px;border:1px solid var(--border);border-radius:24px;background:var(--surface);color:var(--ink)}.planning-dialog::backdrop{background:#080512a8;backdrop-filter:blur(5px)}.planning-dialog h2{font-size:25px}.planning-dialog p{color:var(--muted);line-height:1.8}.planning-dialog .planning-actions{justify-content:flex-end;margin-top:24px}.planning-assignment{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0;padding:16px;border:1px solid var(--border);border-radius:12px}.planning-link-form{display:flex;gap:18px;align-items:end;margin:18px 0}.planning-link-form label{flex:1}.planning-link-form [role=status]{font-size:12px;color:var(--muted)}
+#plan-calendar .cal-real-rows{max-height:510px;overflow-y:auto}#plan-calendar .calendar-card{margin-top:10px}#plan-calendar .cal-row{min-height:76px}#plan-calendar .cal-row .time-label{font-size:12px}.planning-card label{color:var(--ink)}
+@media(max-width:1200px){.planning-filters{grid-template-columns:repeat(3,1fr)}.planning-grid{grid-template-columns:1fr}}
+@media(max-width:700px){.planning-banner{padding:22px}.planning-banner-icon{display:none}.planning-banner h2{font-size:25px}.planning-card{padding:18px}.planning-filters{grid-template-columns:1fr 1fr}.planning-filters label:first-child{grid-column:1/-1}.planning-assignment{grid-template-columns:1fr}.planning-link-form{align-items:stretch;flex-direction:column}.planning-count{margin-left:0}.planning-toolbar .btn{font-size:12px}}
+
+</style><style>
+#app-view .planning-check{display:flex!important;align-items:center;gap:10px;border:0;background:transparent;padding:0}
+#app-view .planning-check input[type="checkbox"]{appearance:auto;width:18px!important;height:18px!important;min-height:18px;padding:0;flex:0 0 18px;border-radius:3px}
+#app-view progress{width:100%;accent-color:var(--violet)}
+</style><style>
+@media(max-width:760px){#plan-calendar.planning-week .cal-area{overflow-x:auto}#plan-calendar.planning-week .cal-head,#plan-calendar.planning-week .cal-real-rows{min-width:700px}.planning-table{min-width:600px}}
+</style></head>
   <body class="min-h-screen bg-slate-100 text-slate-900">
     <main id="login-view" class="grid min-h-screen place-items-center p-4">
       <section class="auth-card">
@@ -389,7 +403,7 @@ html[data-theme="dark"] .slot-dialog input,html[data-theme="dark"] .slot-dialog 
       const stage2aIcons = {"calendar": "<rect x=\"3\" y=\"5\" width=\"18\" height=\"16\" rx=\"2\"/><path d=\"M7 3v4m10-4v4M3 10h18\"/>", "sparkles": "<path d=\"m12 2 1.8 7.2L21 11l-7.2 1.8L12 20l-1.8-7.2L3 11l7.2-1.8L12 2Z\"/>", "refresh": "<path d=\"M20 11a8 8 0 0 0-14-5L3 9m0-6v6h6M4 13a8 8 0 0 0 14 5l3-3m0 6v-6h-6\"/>", "publish": "<path d=\"M12 16V3m0 0L7 8m5-5 5 5M4 15v5h16v-5\"/>", "search": "<circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"m16 16 5 5\"/>", "users": "<circle cx=\"9\" cy=\"8\" r=\"3\"/><path d=\"M2.5 20c0-4 3-6 6.5-6s6.5 2 6.5 6M16 6a3 3 0 0 1 0 6\"/>", "book": "<path d=\"M5 4h14a2 2 0 0 1 2 2v14H7a3 3 0 0 1-3-3V5a1 1 0 0 1 1-1Z\"/>", "building": "<path d=\"M4 21V5l8-3 8 3v16M4 21h16M9 21v-5h6v5\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 6v6l4 2\"/>", "shield": "<path d=\"M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z\"/>", "layers": "<rect x=\"4\" y=\"4\" width=\"16\" height=\"16\" rx=\"3\"/><path d=\"M8 9h8M8 13h8M8 17h5\"/>", "person": "<circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4 22c0-5 3-8 8-8s8 3 8 8\"/>"};
       const stage2aPages = {
         timetable: ['Weekly timetable','Existing recurring timetable and schedule management.','Scheduling','calendar'],
-        generate: ['Generate timetable','Existing schedule generation API. Confirm replacement options before submitting.','Scheduling','sparkles'],
+        generate: ['Generate timetable','Build a constraint-checked draft from teaching assignments.','Scheduling','sparkles'],
         conflicts: ['Conflict check','Review constraint violations using live schedule data.','Scheduling','shield'],
         courses: ['Courses','Manage university courses.','Management','book'],
         rooms: ['Rooms','Manage teaching rooms.','Management','building'],
@@ -434,9 +448,9 @@ html[data-theme="dark"] .slot-dialog input,html[data-theme="dark"] .slot-dialog 
         document.getElementById('breadcrumb-page').textContent = title;
         document.getElementById('breadcrumb-group').textContent = group;
         document.getElementById('shell-page-title').textContent = title;
-        document.getElementById('shell-page-description').textContent = activeView === 'timetable' ? 'Review recurring weekly sessions by weekday, time, group, instructor and room.' : description;
+        document.getElementById('shell-page-description').textContent = activeView === 'timetable' ? 'Review draft or official recurring weekly sessions by weekday, time, group, instructor and room.' : description;
         const buttons = document.getElementById('shell-page-actions');
-        buttons.innerHTML = activeView === 'timetable' ? `<button type="button" class="btn" id="go-to-slots" title="Open the existing time-slot manager">${stage2aIcon('calendar')} Import time slots</button><button type="button" class="btn primary" id="go-to-generate">${stage2aIcon('sparkles')} Generate timetable</button>` : '';
+        buttons.innerHTML = activeView === 'timetable' && tokenPayload?.role === 'admin' ? `<button type="button" class="btn" id="go-to-slots" title="Open the existing time-slot manager">${stage2aIcon('calendar')} Import time slots</button><button type="button" class="btn primary" id="go-to-generate">${stage2aIcon('sparkles')} Generate timetable</button>` : '';
         document.getElementById('go-to-slots')?.addEventListener('click',()=>stage2aNavigate('slots'));
         document.getElementById('go-to-generate')?.addEventListener('click',()=>stage2aNavigate('generate'));
         const clock = document.getElementById('header-clock');
@@ -967,7 +981,7 @@ html[data-theme="dark"] .slot-dialog input,html[data-theme="dark"] .slot-dialog 
         if (!group || group.is_active !== true) throw new Error('Cannot assign workload: the group is inactive or its status is unknown.');
         if (!instructor || instructor.is_active !== true) throw new Error('Cannot assign workload: the instructor is inactive or their status is unknown.');
       }
-      async function renderLoads() {
+      async function renderLegacyLoads() {
         const content = document.getElementById('content');
         if (!supportsRoute(SPRINT2_API.loads, 'post')) { content.innerHTML = unsupported('Teaching loads are not supported by this server.'); return; }
         const durations = [...new Set((cachedData.slots || []).filter(slot => slot.is_active !== false && slot.day_of_week <= 6).map(slot => (clockSeconds(slot.end_time) - clockSeconds(slot.start_time)) / 60))].filter(value => Number.isInteger(value) && value > 0).sort((a,b) => a-b);
@@ -1079,6 +1093,7 @@ html[data-theme="dark"] .slot-dialog input,html[data-theme="dark"] .slot-dialog 
         if (availabilityController?.isSaving()) { showToast('Please wait until saving finishes.'); return; }
         if (availabilityController?.hasChanges() && !window.confirm('Availability changes have not been saved. Leave this page?')) return;
         availabilityController = null;
+        planningLoadId++;
         activeView = view;
         hideNotice();
         stage2aCloseAccount();
@@ -1103,11 +1118,12 @@ html[data-theme="dark"] .slot-dialog input,html[data-theme="dark"] .slot-dialog 
             ['loads','Teaching loads','layers']
           ]) html += stage2aNavButton(id,label,icon,id !== 'loads' || supportsRoute(SPRINT2_API.loads,'get'));
         } else if (role === 'instructor') {
+          if(supportsRoute(SPRINT2_API.availability,'get'))html += stage2aNavButton('availability','My availability','clock');
           html += '<div class="nav-section">Personal</div>';
-          html += stage2aNavButton('timetable','My timetable','calendar',false);
+          html += stage2aNavButton('timetable','My timetable','calendar',supportsRoute('/planning/timetable','get'));
         } else {
           html += '<div class="nav-section">Personal</div>';
-          html += stage2aNavButton('timetable','My timetable','calendar',false);
+          html += stage2aNavButton('timetable','My timetable','calendar',supportsRoute('/planning/timetable','get'));
         }
         nav.innerHTML = html;
         nav.scrollTop = previousScroll;
@@ -1130,6 +1146,7 @@ html[data-theme="dark"] .slot-dialog input,html[data-theme="dark"] .slot-dialog 
 
       function fieldMarkup(field) {
         const required = field.required ? 'required' : '';
+        if(field.type==='features')return `<label class="block text-sm font-medium">${field.label}<input name="features" type="text" placeholder="computer-lab, chemical-lab" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>`;
         if (field.type === 'instructor-user') {
           const linked = new Set((cachedData.instructors || []).map(row => row.user_id));
           const users = (cachedData.users || []).filter(user => user.role === 'instructor' && !linked.has(user.id));
@@ -1298,7 +1315,7 @@ html[data-theme="dark"] .slot-dialog input,html[data-theme="dark"] .slot-dialog 
           busy=true;submit.disabled=cancel.disabled=true;errorBox.hidden=true;
           try{
             const payload={};
-            if(!deleting)for(const field of config.fields){const input=form.elements[field.name];payload[field.name]=field.type==='checkbox'?input.checked:field.type==='number'?Number(input.value):input.value||null;}
+            if(!deleting)for(const field of config.fields){const input=form.elements[field.name];payload[field.name]=field.type==='features'?input.value.split(',').map(x=>x.trim().toLowerCase()).filter(Boolean):field.type==='checkbox'?input.checked:field.type==='number'?Number(input.value):input.value||null;}
             if(!deleting&&key==='groups')validateGroup(payload,(await api(config.endpoint)).filter(item=>item.id!==id),groupYearSupported());
             const result=await api(`${config.endpoint}/${encodeURIComponent(id)}`,deleting?{method:'DELETE'}:{method:'PATCH',body:JSON.stringify(payload)});
             cachedData[key]=deleting?cachedData[key].filter(item=>item.id!==id):cachedData[key].map(item=>item.id===id?result:item);
@@ -1324,6 +1341,7 @@ html[data-theme="dark"] .slot-dialog input,html[data-theme="dark"] .slot-dialog 
             {name:'student_count',label:'Student count (5–50)',type:'number',min:5,max:50,required:true},
           ], columns:['code','academic_year','student_count','is_active']};
         }
+        if(key==='rooms'&&requestFields('/rooms','post').features)config={...config,fields:[...config.fields,{name:'features',label:'Laboratory features (comma separated)',type:'features'}]};
         const rows = cachedData[key] || [];
         document.getElementById('content').innerHTML = `
           ${key === 'slots' ? slotHero(rows) + '<section id="slot-create-section" class="mb-6">' : `<div class="mb-6 flex flex-wrap items-end justify-between gap-3"><div><h2 class="text-2xl font-bold">${config.title}</h2><p class="mt-1 text-sm text-slate-600">Keep your campus information organized and up to date.</p></div></div>`}
@@ -1332,7 +1350,7 @@ html[data-theme="dark"] .slot-dialog input,html[data-theme="dark"] .slot-dialog 
           ${key === 'slots' ? renderSlotTable(rows) : renderEntityTable(config, rows)}
         `;
         if (key === 'slots') { renderBulkBuilder(); setupSlotActions(); return; }
-        if (key === 'users') setupUserActions();
+        if (key === 'users') {setupUserActions();appendStudentLinks();}
         if (['courses','rooms','groups'].includes(key)) {
           document.querySelectorAll('[data-edit-record]').forEach(button=>button.onclick=()=>openCatalogDialog(key,config,button.dataset.editRecord,false));
           document.querySelectorAll('[data-delete-record]').forEach(button=>button.onclick=()=>openCatalogDialog(key,config,button.dataset.deleteRecord,true));
@@ -1351,7 +1369,8 @@ html[data-theme="dark"] .slot-dialog input,html[data-theme="dark"] .slot-dialog 
           const payload = {};
           for (const field of config.fields) {
             const input = form.elements[field.name];
-            if (field.type === 'checkbox') payload[field.name] = input.checked;
+            if(field.type==='features')payload[field.name]=input.value.split(',').map(x=>x.trim().toLowerCase()).filter(Boolean);
+            else if (field.type === 'checkbox') payload[field.name] = input.checked;
             else if (field.type === 'number' || field.name === 'day_of_week') payload[field.name] = Number(input.value);
             else if (input.value || field.required) payload[field.name] = input.value;
             else payload[field.name] = null;
@@ -1380,7 +1399,7 @@ html[data-theme="dark"] .slot-dialog input,html[data-theme="dark"] .slot-dialog 
         });
       }
 
-      function renderGenerateView() {
+      function renderLegacyGenerateView() {
         document.getElementById('content').innerHTML = `
           <div class="max-w-3xl"><h2 class="text-2xl font-bold">Generate automatic timetable</h2><p class="mt-1 text-sm text-slate-600">Enter one assignment per line: course UUID, group UUID, instructor UUID, sessions per week.</p>
           <form id="generate-form" class="mt-6 space-y-4 rounded-xl bg-white p-5 shadow-sm">
@@ -1556,7 +1575,7 @@ html[data-theme="dark"] .slot-dialog input,html[data-theme="dark"] .slot-dialog 
         const settings=cal.settingsOpen?`<div class="dropdown" role="dialog" aria-label="Weekend visibility"><h4>Visible weekend days</h4><div class="pref-row"><strong>Saturday</strong><input class="toggle" id="show-saturday" type="checkbox" ${cal.sat?'checked':''} /></div><div class="pref-row"><strong>Sunday</strong><input class="toggle" id="show-sunday" type="checkbox" ${cal.sun?'checked':''} /></div><p class="panel-note">Visibility only. Data is a recurring weekly schedule.</p></div>`:'';
         return `<section class="calendar-card card live-calendar-card"><div class="calendar-top"><div><h2 style="font-size:18px;margin:0 0 4px">Calendar</h2><p class="section-desc">${cal.view==='day'?'Day view':'Week view'} · ${schedules.length?'Real university timetable sessions':'No scheduled sessions yet'}</p></div><div class="calendar-tools"><button type="button" class="btn sm" data-calendar-action="today">Today</button><div class="segmented" role="group" aria-label="Calendar view"><button type="button" class="${cal.view==='week'?'selected':''}" data-calendar-action="week">Week</button><button type="button" class="${cal.view==='day'?'selected':''}" data-calendar-action="day">Day</button></div><div class="date-nav"><button type="button" data-calendar-action="prev" aria-label="Previous">‹</button><strong>${dateHeading}</strong><button type="button" data-calendar-action="next" aria-label="Next">›</button></div><div class="filters-wrapper"><button type="button" class="btn sm icon-only" data-calendar-action="settings" aria-label="Calendar settings" aria-expanded="${cal.settingsOpen}">${stage2aIcon('shield')}</button>${settings}</div></div></div><div class="cal-area"><div class="cal-head" style="${columns}"><div class="cal-time-head">TIME</div>${headers}</div>${empty}</div><div class="calendar-footer"><span>${stage2aIcon('calendar')} Calendar rows and sessions are loaded from the existing application.</span><span>Recurring weekly schedule · weekend visibility configurable</span></div></section>`;
       }
-      function renderTimetable() {
+      function renderLegacyTimetable() {
         const slots=cachedData.slots || [], schedules=cachedData.schedules || [];
         const rooms=new Set(schedules.map(s=>s.room_id).filter(Boolean));
         const hero=`<div class="intro-metrics"><div class="hero card"><div class="hero-content"><div class="overline">Timetable status</div><h2>${schedules.length ? 'Weekly schedule ready' : 'No classes scheduled'}</h2><p>${schedules.length ? 'Review sessions from your university database.' : 'Add classes or use Generate timetable to create your schedule.'}</p><button type="button" class="hero-cta" id="hero-open-slots">Time slots →</button></div><div class="hero-decor"></div><div class="hero-schedule" aria-hidden="true">${'<i></i>'.repeat(12)}</div></div><div class="stat card"><div class="stat-label">Sessions this week <span class="stat-icon">${stage2aIcon('calendar')}</span></div><strong class="stat-value">${schedules.length}</strong><span class="stat-caption">Real schedule records</span></div><div class="stat card"><div class="stat-label">Rooms in use <span class="stat-icon">${stage2aIcon('building')}</span></div><strong class="stat-value">${rooms.size}</strong><span class="stat-caption">Assigned schedule rooms</span></div><div class="stat card"><div class="stat-label">Open conflicts <span class="stat-icon">${stage2aIcon('shield')}</span></div><strong class="stat-value" aria-label="Not checked">—</strong><span class="stat-caption">Use Conflict check to validate</span></div></div>`;
@@ -1770,6 +1789,7 @@ html[data-theme="dark"] .slot-dialog input,html[data-theme="dark"] .slot-dialog 
       function renderView() {
         if (activeView === 'availability' && tokenPayload?.role === 'instructor') { renderAvailability(); return; }
         if (tokenPayload?.role !== 'admin') {
+          if(supportsRoute('/planning/timetable','get')){renderPlanningTimetable();return;}
           document.getElementById('content').innerHTML = '<div class="rounded-xl bg-white p-6 shadow-sm"><h2 class="text-xl font-bold">Personal timetable not yet available</h2><p class="mt-2 text-slate-600">You are signed in with your university account. A server-authorized personal timetable endpoint is required before individual schedules can be shown. Administrator data is not exposed here.</p></div>';
           return;
         }
@@ -1785,6 +1805,7 @@ html[data-theme="dark"] .slot-dialog input,html[data-theme="dark"] .slot-dialog 
       }
 
       function logout(showLogin = true) {
+        planningLoadId++;planningRows=[];planningStatus={};planningSource='draft';planningFilter={q:'',group:'',instructor:'',course:'',room:''};
         hideNotice();
         availabilityVersion++;
         availabilityController = null;
@@ -1865,6 +1886,136 @@ html[data-theme="dark"] .slot-dialog input,html[data-theme="dark"] .slot-dialog 
         if (availabilityController?.hasChanges() && !window.confirm('Availability changes have not been saved. Sign out?')) return;
         logout();
       });
+/* Sprint 4–5: live draft/publication workflow. Uses the existing theme tokens. */
+let planningSource='draft', planningRows=[], planningStatus={}, planningFilter={q:'',group:'',instructor:'',course:'',room:''}, planningLoadId=0;
+const p45esc=escapeHtml;
+const p45post=(path,body,method='POST')=>api(path,{method,body:JSON.stringify(body)});
+const p45option=(value,text,selected='')=>`<option value="${p45esc(value)}" ${String(value)===String(selected)?'selected':''}>${p45esc(text)}</option>`;
+function p45error(error){return [typeof error.detail==='string'?error.detail:error.detail?.message||error.message,...(error.detail?.conflicts||[]).map(x=>x.detail),...(error.detail?.unscheduled||[]).map(x=>x.reason||JSON.stringify(x))].join('\n');}
+function p45notice(text,type='success'){const el=document.getElementById('planning-notice');if(el){el.hidden=false;el.className='planning-notice '+type;el.textContent=text;}else showNotice(text,type);}
+function p45date(value){return value?new Date(value).toLocaleString():'Not published yet';}
+function p45opts(rows,id,label){return [...new Map(rows.map(r=>[String(r[id]),r[label]])).entries()].map(([v,t])=>p45option(v,t)).join('');}
+async function renderPersonalTimetable(){return renderTimetable();}
+async function renderPlanningTimetable(){
+ const session=tokenFromStorage(),version=++planningLoadId,content=document.getElementById('content'),admin=tokenPayload?.role==='admin';
+ content.innerHTML='<div class="planning-card"><p>Loading timetable…</p></div>';
+ try{
+  const [rows,status]=await Promise.all([api('/planning/timetable?source='+(admin?planningSource:'published')+'&week_start='+p45week()),api('/planning/status')]);
+  if(version!==planningLoadId||activeView!=='timetable'||session!==tokenFromStorage())return;
+  planningRows=rows;planningStatus=status;if(admin&&planningSource==='draft')cachedData.schedules=rows;
+  const published=!admin||planningSource==='published';
+  const roleNote=admin?'Review the working draft, then publish an official copy.':tokenPayload.role==='student'?(status.group_name?'Official classes for '+status.group_name+'.':'Your account is not linked to a group. Ask an administrator to assign your group.'):'Only your assigned classes from the latest publication are shown.';
+  content.innerHTML=`<section class="planning-banner"><div><span class="eyebrow">${published?'OFFICIAL TIMETABLE':'WORKING DRAFT'}</span><h2>${published?'Your week, clearly planned.':'Build. Review. Publish.'}</h2><p>${p45esc(roleNote)}</p><span class="planning-badge">${status.published_version?'Published version '+status.published_version+' · '+p45date(status.published_at):'No official version published yet'}</span></div><div class="planning-banner-icon">${stage2aIcon('calendar')}</div></section>
+  <div id="planning-notice" role="status" hidden></div>
+  <div class="planning-toolbar">${admin?`<div class="segmented"><button data-plan-source="draft" aria-pressed="${!published}" class="${!published?'selected':''}">Draft</button><button data-plan-source="published" aria-pressed="${published}" class="${published?'selected':''}">Published</button></div><button class="btn primary" id="plan-publish">Publish draft</button>${!published?'<button class="btn" id="add-manual-class">Add class</button><button class="btn" id="plan-generate">Generate draft</button>':''}`:'<span class="planning-badge">Published · read only</span>'}<button class="btn" id="plan-refresh">Refresh</button><span class="planning-count">${rows.length} classes · ${new Set(rows.map(r=>r.room_id)).size} rooms</span></div>
+  <section class="planning-card planning-filters" aria-label="Search and filter timetable"><label>Search<input id="plan-search" type="search" placeholder="Course, room, group or instructor" value="${p45esc(planningFilter.q)}"></label>${[['group','Group','group_id','group_name'],['instructor','Instructor','instructor_id','instructor_email'],['course','Course','course_id','course_name'],['room','Room','room_id','room_name']].map(([key,title,id,label])=>`<label>${title}<select data-plan-filter="${key}"><option value="">All ${title.toLowerCase()}s</option>${p45opts(rows,id,label)}</select></label>`).join('')}<button class="btn" id="plan-clear">Clear filters</button></section>
+  <p class="planning-helper" id="plan-match" aria-live="polite"></p><div id="plan-calendar"></div><section id="plan-list" class="planning-card"></section>`;
+  content.querySelectorAll('[data-plan-source]').forEach(b=>b.onclick=()=>{planningSource=b.dataset.planSource;planningFilter={q:'',group:'',instructor:'',course:'',room:''};renderTimetable();});
+  content.querySelector('#plan-refresh').onclick=()=>renderTimetable();
+  content.querySelector('#plan-generate')?.addEventListener('click',()=>stage2aNavigate('generate'));
+  content.querySelector('#add-manual-class')?.addEventListener('click',()=>openScheduleEditor());
+  content.querySelector('#plan-publish')?.addEventListener('click',p45publish);
+  content.querySelector('#plan-search').oninput=e=>{planningFilter.q=e.target.value;drawPlanningCalendar();};
+  content.querySelectorAll('[data-plan-filter]').forEach(el=>{el.value=planningFilter[el.dataset.planFilter];if(!el.value)planningFilter[el.dataset.planFilter]='';el.onchange=()=>{planningFilter[el.dataset.planFilter]=el.value;drawPlanningCalendar();};});
+  content.querySelector('#plan-clear').onclick=()=>{planningFilter={q:'',group:'',instructor:'',course:'',room:''};content.querySelector('#plan-search').value='';content.querySelectorAll('[data-plan-filter]').forEach(el=>el.value='');drawPlanningCalendar();};
+  drawPlanningCalendar();
+ }catch(e){if(version===planningLoadId&&session===tokenFromStorage())content.innerHTML=`<div class="planning-notice error">${p45esc(p45error(e))}</div>`;}
+}
+function drawPlanningCalendar(){
+ const admin=tokenPayload?.role==='admin',draft=admin&&planningSource==='draft';
+ const keys={group:'group_id',instructor:'instructor_id',course:'course_id',room:'room_id'};
+ const filteredRows=planningRows.filter(r=>Object.entries(keys).every(([key,id])=>!planningFilter[key]||r[id]===planningFilter[key])&&(!planningFilter.q||[r.course_code,r.course_name,r.group_name,r.room_name,r.instructor_email].join(' ').toLowerCase().includes(planningFilter.q.toLowerCase())));
+ const rows=stage2aCalendar.view==='day'?filteredRows.filter(r=>Number(r.day_of_week)===stage2aCalendar.day+1):filteredRows;
+ const slots=draft?(cachedData.slots||[]):[...new Map(planningRows.map(r=>[r.time_slot_id,{id:r.time_slot_id,day_of_week:r.day_of_week,start_time:r.start_time,end_time:r.end_time,is_active:true}])).values()];
+ document.getElementById('plan-match').textContent=`${rows.length} of ${planningRows.length} classes match · All selected filters apply together · Recurring weekly timetable`;
+ // The existing calendar receives already-filtered, server-authorized records.
+ stage2aCalendar.query='';stage2aCalendar.filters=[];
+ document.getElementById('plan-calendar').innerHTML=stage2aLiveCalendar(slots,rows);
+ if(!rows.length)document.getElementById('plan-calendar').querySelector('.cal-area').innerHTML=`<div class="planning-empty">${stage2aIcon('calendar')}<h3>${filteredRows.length&&stage2aCalendar.view==='day'?'No classes for this day':planningRows.length?'No classes match these filters':!planningStatus.published_version&&!draft?'No timetable published yet':'No classes for this week'}</h3><p>${draft?'Add a class or generate from teaching loads.':'Your official classes will appear here when available.'}</p></div>`;
+ const calendar=document.getElementById('plan-calendar');calendar.classList.toggle('planning-week',stage2aCalendar.view==='week');
+ calendar.querySelectorAll('[data-calendar-action=week],[data-calendar-action=day]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.calendarAction===stage2aCalendar.view)));
+ calendar.querySelector('#show-saturday')?.setAttribute('aria-label','Show Saturday');calendar.querySelector('#show-sunday')?.setAttribute('aria-label','Show Sunday');
+ calendar.querySelectorAll('[data-calendar-action]').forEach(b=>b.onclick=()=>{
+  const c=stage2aCalendar,a=b.dataset.calendarAction;
+  if(a==='week'||a==='day')c.view=a;
+  if(a==='today'){c.weekOffset=0;c.day=(new Date().getDay()+6)%7;}
+  if(a==='prev'||a==='next'){const d=a==='next'?1:-1;if(c.view==='week')c.weekOffset+=d;else{c.day+=d;if(c.day<0){c.day=6;c.weekOffset--;}if(c.day>6){c.day=0;c.weekOffset++;}}}
+  if(a==='settings')c.settingsOpen=!c.settingsOpen;
+  if(['next','prev','today'].includes(a))renderPlanningTimetable().then(()=>document.querySelector('[data-calendar-action="'+a+'"]')?.focus());else drawPlanningCalendar();
+ });
+ calendar.querySelector('#show-saturday')?.addEventListener('change',e=>{stage2aCalendar.sat=e.target.checked;drawPlanningCalendar();});
+ calendar.querySelector('#show-sunday')?.addEventListener('change',e=>{stage2aCalendar.sun=e.target.checked;drawPlanningCalendar();});
+ const list=document.getElementById('plan-list');list.innerHTML=`<div class="planning-section-title"><h3>${draft?'Draft classes':'Official classes'}</h3><span>${rows.length} shown</span></div><div class="planning-table-wrap"><table class="planning-table"><thead><tr><th>Course</th><th>Group / instructor</th><th>Day & time</th><th>Room</th>${draft?'<th>Actions</th>':''}</tr></thead><tbody>${rows.map(r=>`<tr><td><strong>${p45esc(r.course_code)}</strong><small>${p45esc(r.course_name)}</small></td><td>${p45esc(r.group_name)}<small>${p45esc(r.instructor_email)}</small></td><td>${DAYS[r.day_of_week]}<small>${formatTime(r.start_time)}–${formatTime(r.end_time)}</small></td><td>${p45esc(r.room_name)}</td>${draft?`<td><div class="planning-actions"><button class="btn sm" data-plan-lock="${r.id}" data-locked="${r.is_locked}">${r.is_locked?'Unlock':'Lock'}</button><button class="btn sm" data-edit-schedule="${r.id}" ${r.is_locked?'disabled':''}>Edit</button><button class="btn sm" data-plan-delete="${r.id}" ${r.is_locked?'disabled':''}>Delete</button></div></td>`:''}</tr>`).join('')||`<tr><td colspan="5" class="planning-empty">No classes match these filters.</td></tr>`}</tbody></table></div>`;
+ list.querySelectorAll('[data-plan-lock]').forEach(b=>b.onclick=async()=>{b.disabled=true;try{await p45post('/planning/locks/'+b.dataset.planLock,{locked:b.dataset.locked!=='true'},'PUT');await renderTimetable();}catch(e){p45notice(e.message,'error');b.disabled=false;}});
+ list.querySelectorAll('[data-edit-schedule]').forEach(b=>b.onclick=()=>openScheduleEditor(b.dataset.editSchedule));
+ list.querySelectorAll('[data-plan-delete]').forEach(b=>b.onclick=()=>openScheduleDeleteModal([b.dataset.planDelete]));
+}
+function p45publish(){
+ if(document.getElementById('planning-publish-dialog'))return;
+ const dialog=document.createElement('dialog');dialog.id='planning-publish-dialog';dialog.setAttribute('aria-label','Publish timetable');dialog.className='planning-dialog';dialog.innerHTML=`<span class="eyebrow">OFFICIAL TIMETABLE</span><h2>Publish the current draft?</h2><p>The server will check rooms, availability, overlaps and workload limits. Students and instructors will receive this version. Later draft edits will not change it.</p><p class="planning-notice error" data-error hidden></p><div class="planning-actions"><button class="btn" data-cancel>Cancel</button><button class="btn primary" data-confirm>Validate & publish</button></div>`;document.body.append(dialog);dialog.showModal();dialog.querySelector('[data-cancel]').focus();let busy=false;dialog.oncancel=e=>{if(busy)e.preventDefault();};dialog.addEventListener('close',()=>dialog.remove());dialog.querySelector('[data-cancel]').onclick=()=>dialog.close();dialog.querySelector('[data-confirm]').onclick=async()=>{if(busy)return;busy=true;dialog.querySelectorAll('button').forEach(b=>b.disabled=true);try{const r=await p45post('/planning/publish',{confirm:true});dialog.close();await renderTimetable();p45notice(`Version ${r.version} published · ${r.published_count} classes. Personal timetables are now updated.`);}catch(e){const el=dialog.querySelector('[data-error]');el.hidden=false;el.textContent=p45error(e);}finally{busy=false;dialog.querySelectorAll('button').forEach(b=>b.disabled=false);}};
+}
+async function renderPlanningGenerateView(){
+ const session=tokenFromStorage(),version=++planningLoadId,content=document.getElementById('content');content.innerHTML='<p>Loading generation workspace…</p>';
+ try{
+ const [prefs,rules,status,loads,term]=await Promise.all([api('/planning/settings'),api('/planning/course-rules'),api('/planning/status'),api('/teaching-loads'),api('/planning/term')]);
+ if(version!==planningLoadId||activeView!=='generate'||session!==tokenFromStorage())return;
+ content.innerHTML=`<section class="planning-banner"><div><span class="eyebrow">GENERATION STUDIO</span><h2>A balanced week starts here.</h2><p>Hard rules protect availability, capacity and room type. Preferences improve the choice of valid slots.</p><span class="planning-badge">Published version stays safe · Locked classes stay in place</span></div><div class="planning-banner-icon">${stage2aIcon('sparkles')}</div></section><div id="planning-notice" role="status" hidden></div>
+ <div class="planning-grid"><section class="planning-card"><span class="eyebrow">01 / TEACHING REQUIREMENTS</span><h3>What should we schedule?</h3><label class="planning-field">Assignment source<select id="plan-assignment-source"><option value="loads">Saved teaching loads (${loads.filter(l=>l.is_active).length})</option><option value="manual">Choose assignments here</option></select></label><div id="plan-assignment-rows" hidden></div><button id="plan-add-assignment" class="btn sm" hidden>Add assignment</button><p class="planning-helper">Rebuild replaces unlocked draft classes. ${status.locked_count} locked classes are retained. The official publication is unchanged.</p><div id="plan-progress" role="status" aria-live="polite"></div><progress id="plan-progress-bar" hidden aria-label="Generation in progress"></progress><button id="plan-run" class="btn primary">Generate updated draft</button><button id="plan-review" class="btn">Review draft</button></section>
+ <section class="planning-card"><span class="eyebrow">02 / SOFT PREFERENCES</span><h3>Shape the teaching week</h3><form id="plan-preferences"><label class="planning-check"><input type="checkbox" name="avoid_early" ${prefs.avoid_early?'checked':''}> Avoid early classes when possible</label><label class="planning-field">Preferred start time<input type="time" name="earliest_preferred" required value="${prefs.earliest_preferred.slice(0,5)}"></label><label class="planning-check"><input type="checkbox" name="minimize_gaps" ${prefs.minimize_gaps?'checked':''}> Minimize gaps within a teaching day</label><label class="planning-check"><input type="checkbox" name="balance_days" ${prefs.balance_days?'checked':''}> Spread classes across weekdays</label><label class="planning-field">Preferred maximum classes per group per day<input type="number" name="max_classes_per_day" required min="1" max="14" value="${prefs.max_classes_per_day}"></label><details><summary>Preference weights</summary><div class="planning-rule-grid">${[['early_weight','Early classes'],['gap_weight','Gaps'],['balance_weight','Day balance'],['daily_weight','Daily load']].map(([name,label])=>`<label class="planning-field">${label}<input type="number" name="${name}" min="0" max="10" required value="${prefs[name]}"></label>`).join('')}</div></details><p class="planning-helper">Soft preferences never override hard rules. The basic solver uses ranked choices; it does not guarantee a globally optimal timetable.</p><div class="planning-actions"><button class="btn" type="submit">Save preferences</button><button class="btn" type="button" id="plan-defaults">Restore defaults</button></div></form></section></div>
+ <section class="planning-card"><h3>Teaching period</h3><form id="plan-term"><label class="planning-field">First teaching date<input type="date" name="start" value="${term.start||''}"></label><label class="planning-field">Last teaching date<input type="date" name="end" value="${term.end||''}"></label><p>Leave dates empty for an unbounded recurring timetable. Publication saves its own copy of these dates.</p><button class="btn" type="submit">Save teaching period</button></form></section><section class="planning-card"><span class="eyebrow">03 / HARD ROOM RULES</span><h3>The right room for every course</h3><p class="planning-helper">Each course requires a lecture or practical room. Capacity must also fit the group. Unclassified rooms are excluded.</p><div class="planning-rule-grid">${rules.map(r=>`<label class="planning-field">${p45esc(r.code)} · ${p45esc(r.name)}<select data-course-rule="${r.course_id}">${p45option('','Use teaching delivery mode',r.room_type||'')}${p45option('practical','Practical',r.room_type)}${p45option('lecture','Lecture',r.room_type)}</select><span>Required laboratory features (comma separated)</span><input data-rule-features="${r.course_id}" value="${p45esc((r.required_features||[]).join(', '))}" placeholder="computer-lab, chemical-lab"></label>`).join('')||'<p>Create a course first.</p>'}</div><button class="btn" id="plan-save-rules">Save room requirements</button></section>
+ <section class="planning-card"><div class="planning-section-title"><h3>Drafts & publications</h3><span>Latest 12 versions</span></div><div class="planning-table-wrap"><table class="planning-table"><thead><tr><th>Version</th><th>State</th><th>Created</th><th>Classes</th></tr></thead><tbody>${status.versions.map(v=>`<tr><td>v${v.id}</td><td><span class="planning-badge">${v.kind}</span></td><td>${p45date(v.created_at)}</td><td>${v.class_count}</td></tr>`).join('')||'<tr><td colspan="4">No generated or published versions yet.</td></tr>'}</tbody></table></div></section>`;
+ const termForm=content.querySelector('#plan-term');termForm.onsubmit=async e=>{e.preventDefault();const button=termForm.querySelector('button');button.disabled=true;try{await p45post('/planning/term',{start:termForm.start.value||null,end:termForm.end.value||null},'PUT');p45notice('Teaching period saved.');}catch(error){p45notice(p45error(error),'error');}finally{button.disabled=false;}};
+ const form=content.querySelector('#plan-preferences');
+ const readPrefs=()=>({avoid_early:form.avoid_early.checked,earliest_preferred:form.earliest_preferred.value,minimize_gaps:form.minimize_gaps.checked,balance_days:form.balance_days.checked,max_classes_per_day:Number(form.max_classes_per_day.value),early_weight:Number(form.early_weight.value),gap_weight:Number(form.gap_weight.value),balance_weight:Number(form.balance_weight.value),daily_weight:Number(form.daily_weight.value)});
+ form.onsubmit=async e=>{e.preventDefault();if(form.dataset.busy)return;form.dataset.busy='1';const submit=form.querySelector('[type=submit]');submit.disabled=true;try{await p45post('/planning/settings',readPrefs(),'PUT');p45notice('Generation preferences saved.');}catch(err){p45notice(p45error(err),'error');}finally{delete form.dataset.busy;submit.disabled=false;}};
+ content.querySelector('#plan-defaults').onclick=async()=>{try{await p45post('/planning/settings',{avoid_early:false,earliest_preferred:'09:00',minimize_gaps:true,balance_days:true,max_classes_per_day:4,early_weight:2,gap_weight:3,balance_weight:1,daily_weight:2},'PUT');await renderGenerateView();p45notice('Default preferences restored and saved.');}catch(e){p45notice(e.message,'error');}};
+ const saveRules=()=>Promise.all([...content.querySelectorAll('[data-course-rule]')].map(el=>el.value?p45post('/planning/course-rules/'+el.dataset.courseRule,{room_type:el.value,required_features:content.querySelector('[data-rule-features="'+el.dataset.courseRule+'"]').value.split(',').map(x=>x.trim().toLowerCase()).filter(Boolean)},'PUT'):api('/planning/course-rules/'+el.dataset.courseRule,{method:'DELETE'})));
+ content.querySelector('#plan-save-rules').onclick=async()=>{try{await saveRules();p45notice('Room requirements saved.');}catch(e){p45notice(e.message,'error');}};
+ function addRow(){const row=document.createElement('div');row.className='planning-assignment';row.innerHTML=`<label>Course<select name="course_id">${(cachedData.courses||[]).filter(r=>r.is_active).map(r=>p45option(r.id,r.code+' · '+r.name)).join('')}</select></label><label>Group<select name="group_id">${(cachedData.groups||[]).filter(r=>r.is_active).map(r=>p45option(r.id,(r.code||r.name)+(r.academic_year?' · '+r.academic_year:''))).join('')}</select></label><label>Instructor<select name="instructor_id">${(cachedData.instructors||[]).filter(r=>r.is_active).map(r=>p45option(r.id,r.email)).join('')}</select></label><label>Classes / week<input type="number" name="sessions_per_week" min="1" max="14" value="1"></label><label>Minutes<input type="number" name="session_minutes" min="1" max="1440" value="50"></label><button class="btn sm" data-remove>Remove</button>`;row.querySelector('[data-remove]').onclick=()=>row.remove();content.querySelector('#plan-assignment-rows').append(row);}
+ content.querySelector('#plan-add-assignment').onclick=addRow;
+ content.querySelector('#plan-assignment-source').onchange=e=>{const manual=e.target.value==='manual';content.querySelector('#plan-assignment-rows').hidden=!manual;content.querySelector('#plan-add-assignment').hidden=!manual;if(manual&&!content.querySelector('.planning-assignment'))addRow();};
+ content.querySelector('#plan-review').onclick=()=>{planningSource='draft';stage2aNavigate('timetable');};
+ content.querySelector('#plan-run').onclick=async e=>{const button=e.currentTarget;if(button.dataset.busy)return;button.dataset.busy='1';button.disabled=true;button.textContent='Building draft…';content.querySelector('#plan-progress-bar').hidden=false;content.querySelector('#plan-progress').textContent='Checking requirements and finding hard-valid placements…';try{
+  if(!form.reportValidity())return;
+  let assignments=null;
+  if(content.querySelector('#plan-assignment-source').value==='manual'){
+   assignments=[...content.querySelectorAll('.planning-assignment')].map(row=>Object.fromEntries([...row.querySelectorAll('[name]')].map(el=>[el.name,el.type==='number'?Number(el.value):el.value])));
+   if(!assignments.length)throw Error('Add at least one assignment.');
+  }
+  if(!confirm('Rebuild the working draft? Unlocked draft classes are replaced. Locked classes and the official publication stay unchanged.'))return;
+  if(session!==tokenFromStorage())throw Error('Your session has changed. Sign in again.');
+  await p45post('/planning/settings',readPrefs(),'PUT');await saveRules();
+  const result=await p45post('/planning/generate',{assignments,replace_existing:true});
+  await refreshData(['schedules','slots']);await renderGenerateView();p45notice(`Draft updated: ${result.generated_count} new classes. Locked classes were retained. Quality score: ${result.quality.score}/100 (heuristic). ${result.log.join(' · ')}. ${result.quality.penalty>0?'Some soft preferences could not be met; all hard rules passed.':''} Review the draft before publishing.`);
+ }catch(err){p45notice(p45error(err),'error');}finally{delete button.dataset.busy;button.disabled=false;button.textContent='Generate updated draft';if(content.querySelector('#plan-progress-bar'))content.querySelector('#plan-progress-bar').hidden=true;if(content.querySelector('#plan-progress'))content.querySelector('#plan-progress').textContent='';}};
+ }catch(e){if(version===planningLoadId&&session===tokenFromStorage())content.innerHTML=`<div class="planning-notice error">${p45esc(p45error(e))}</div>`;}
+}
+async function appendStudentLinks(){
+ if(!supportsRoute('/planning/student-links','get'))return;
+ try{const [students,groups]=await Promise.all([api('/planning/student-links'),api('/student-groups')]);if(activeView!=='users'||tokenPayload?.role!=='admin')return;
+ document.getElementById('student-group-access')?.remove();const section=document.createElement('section');section.id='student-group-access';section.className='planning-card';section.innerHTML=`<span class="eyebrow">PERSONAL TIMETABLE ACCESS</span><h3>Connect students to their groups</h3><p class="planning-helper">Only administrators can assign a group. Students see only that group in the published timetable.</p>${students.map(s=>`<form class="planning-link-form" data-student="${s.user_id}"><label>${p45esc(s.email)}<select name="group_id" required><option value="">Choose a group</option>${groups.filter(g=>g.is_active).map(g=>p45option(g.id,(g.code||g.name)+(g.academic_year?' · '+g.academic_year:''),s.group_id)).join('')}</select></label><button class="btn" type="submit">Save group</button><span role="status"></span></form>`).join('')||'<p>Create an account with the student role above to link a group.</p>'}`;document.getElementById('content').append(section);
+ section.querySelectorAll('form').forEach(form=>form.onsubmit=async e=>{e.preventDefault();const button=form.querySelector('button'),status=form.querySelector('[role=status]');button.disabled=true;try{await p45post('/planning/student-links/'+form.dataset.student,{group_id:form.group_id.value},'PUT');status.textContent='Group saved';}catch(err){status.textContent=err.message;}finally{button.disabled=false;}});
+ }catch(e){showNotice(e.message,'error');}
+}
+async function renderPlanningLoads(){
+ const content=document.getElementById('content');content.innerHTML='<p>Loading teaching loads…</p>';
+ try{const loads=await api('/teaching-loads');if(activeView!=='loads')return;
+ const options=(rows,label)=>rows.filter(r=>r.is_active!==false).map(r=>p45option(r.id,label(r))).join('');
+ content.innerHTML=`<section class="planning-banner"><div><span class="eyebrow">ACADEMIC PLANNING</span><h2>Define the teaching week.</h2><p>Assign a course to a group and instructor. These saved requirements feed automatic generation.</p></div><div class="planning-banner-icon">${stage2aIcon('layers')}</div></section><div id="planning-notice" role="status" hidden></div><section class="planning-card"><h3 id="plan-load-heading">New teaching assignment</h3><form id="plan-load-form"><div class="planning-rule-grid"><label class="planning-field">Course<select name="course_id" required>${options(cachedData.courses,r=>r.code+' · '+r.name)}</select></label><label class="planning-field">Group<select name="group_id" required>${options(cachedData.groups,r=>r.code||r.name)}</select></label><label class="planning-field">Instructor<select name="instructor_id" required>${options(cachedData.instructors,r=>r.email)}</select></label><label class="planning-field">Delivery mode<select name="delivery_mode"><option value="lecture">Lecture</option><option value="practice">Practice</option><option value="lab">Laboratory</option></select></label><label class="planning-field">Class length, minutes<input name="session_minutes" type="number" min="1" max="1440" required value="50"></label><label class="planning-field">Classes per week<input name="sessions_per_week" type="number" min="1" max="14" required value="2"></label></div><div class="planning-actions"><button class="btn primary" type="submit">Save assignment</button><button class="btn" type="button" id="plan-load-cancel">Clear</button><button class="btn" type="button" id="plan-load-generate">Generate timetable</button></div></form></section><section class="planning-card"><h3>Saved assignments</h3><div class="planning-table-wrap"><table class="planning-table"><thead><tr><th>Course</th><th>Group</th><th>Instructor</th><th>Weekly load</th><th>Actions</th></tr></thead><tbody>${loads.map(r=>`<tr><td>${p45esc(cachedData.courses.find(c=>c.id===r.course_id)?.code||'Unknown')}</td><td>${p45esc(cachedData.groups.find(g=>g.id===r.group_id)?.name||'Unknown')}</td><td>${p45esc(cachedData.instructors.find(i=>i.id===r.instructor_id)?.email||'Unknown')}</td><td>${r.sessions_per_week} × ${r.session_minutes} min${r.is_active?'':' · inactive'}</td><td><div class="planning-actions"><button class="btn sm" data-load-edit="${r.id}">Edit</button><button class="btn sm" data-load-delete="${r.id}">Delete</button></div></td></tr>`).join('')||'<tr><td colspan="5">No assignments yet.</td></tr>'}</tbody></table></div></section>`;
+ let editId=null;const form=content.querySelector('#plan-load-form');
+ content.querySelector('#plan-load-cancel').onclick=()=>{editId=null;form.reset();content.querySelector('#plan-load-heading').textContent='New teaching assignment';};
+ content.querySelector('#plan-load-generate').onclick=()=>stage2aNavigate('generate');
+ content.querySelectorAll('[data-load-edit]').forEach(b=>b.onclick=()=>{const r=loads.find(x=>x.id===b.dataset.loadEdit);editId=r.id;for(const name of ['course_id','group_id','instructor_id','session_minutes','sessions_per_week','delivery_mode'])form.elements[name].value=r[name];content.querySelector('#plan-load-heading').textContent='Edit teaching assignment';form.scrollIntoView({behavior:'smooth',block:'center'});});
+ form.onsubmit=async e=>{e.preventDefault();const b=form.querySelector('[type=submit]');b.disabled=true;try{const payload=Object.fromEntries(new FormData(form));payload.session_minutes=Number(payload.session_minutes);payload.sessions_per_week=Number(payload.sessions_per_week);const old=loads.find(l=>l.id===editId);payload.delivery_mode=form.elements.delivery_mode.value;payload.is_active=true;await p45post('/teaching-loads'+(editId?'/'+editId:''),payload,editId?'PUT':'POST');await renderLoads();p45notice('Assignment saved. Regenerate the draft to apply this change.');}catch(err){p45notice(p45error(err),'error');}finally{b.disabled=false;}};
+ content.querySelectorAll('[data-load-delete]').forEach(b=>b.onclick=async()=>{if(!confirm('Delete this teaching assignment? Existing draft and published classes remain until you regenerate.'))return;try{await api('/teaching-loads/'+b.dataset.loadDelete,{method:'DELETE'});await renderLoads();p45notice('Assignment removed. Regenerate to update the draft.');}catch(e){p45notice(e.message,'error');}});
+ }catch(e){content.innerHTML=`<div class="planning-notice error">${p45esc(p45error(e))}</div>`;}
+}
+
+function p45week(){const d=stage2aDate(0);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function renderTimetable(){return supportsRoute('/planning/timetable','get')?renderPlanningTimetable():renderLegacyTimetable();}
+function renderGenerateView(){return supportsRoute('/planning/generate','post')?renderPlanningGenerateView():renderLegacyGenerateView();}
+function renderLoads(){return supportsRoute('/planning/generate','post')?renderPlanningLoads():renderLegacyLoads();}
+
       const savedToken = tokenFromStorage();
       if (savedToken) {
         try { tokenPayload = decodeJwt(savedToken); startApplication(); }

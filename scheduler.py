@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
 from datetime import time
+from time import monotonic
 from typing import Any
 
 
@@ -102,6 +103,7 @@ def generate_schedule_matrix(
     time_slots: Iterable[Mapping[str, Any] | object],
     existing_entries: Iterable[Mapping[str, Any] | object] = (),
     availability: Iterable[Mapping[str, Any] | object] = (),
+    generation_preferences: dict | None = None,
 ) -> list[dict[str, Any]]:
     """Generate a reproducible set of non-conflicting schedule entries.
 
@@ -110,6 +112,7 @@ def generate_schedule_matrix(
     ``sessions_per_week`` defaults to one. Existing entries reserve their resources
     when the caller is adding to an already-published timetable.
     """
+    deadline = monotonic() + generation_preferences['_max_seconds'] if generation_preferences and '_max_seconds' in generation_preferences else None
     group_map = {
         _identity(_value(group, "id")): group
         for group in groups if bool(_value(group, "is_active", True))
@@ -161,9 +164,13 @@ def generate_schedule_matrix(
         student_count = int(_value(group, "student_count"))
         eligible_rooms = [
             room for room in available_rooms if int(_value(room, "capacity")) >= student_count
+            and (not _value(requirement, "required_room_type") or _value(room, "room_type") == _value(requirement, "required_room_type"))
+            and set(_value(requirement, "required_features", [])).issubset(_value(room, "features", []))
         ]
         if not eligible_rooms:
-            requirement_snapshot["reason"] = "No active room has sufficient capacity"
+            requirement_snapshot["reason"] = ("No active room matches the required type, laboratory features and capacity"
+                                               if _value(requirement, "required_room_type") or _value(requirement, "required_features")
+                                               else "No active room has sufficient capacity")
             invalid_requirements.append(requirement_snapshot)
             continue
 
@@ -226,7 +233,17 @@ def generate_schedule_matrix(
 
         instructor_minutes = sum(duration(row) for row in assignments if _identity(row["instructor_id"]) == instructor_key)
         course_minutes = sum(duration(row) for row in assignments if row["course_id"] == requirement["course_id"] and row["group_id"] == requirement["group_id"])
-        preferred_slots = sorted(ordered_slots, key=lambda slot: preferences.get((instructor_key, _identity(_value(slot, "id")))) != "preferred")
+        def preference_score(slot):
+            if deadline is not None and monotonic() >= deadline:
+                raise SchedulingError([{'course_id': requirement['course_id'], 'group_id': requirement['group_id'],
+                                       'reason': 'Generation time limit reached; reduce the workload or slot set'}])
+            preferred = preferences.get((instructor_key, _identity(_value(slot, "id")))) != "preferred"
+            if not generation_preferences:
+                return (preferred, 0, _slot_sort_key(slot))
+            candidate = {**requirement, "day_of_week": _value(slot, "day_of_week"),
+                         "start_time": _value(slot, "start_time"), "end_time": _value(slot, "end_time")}
+            return (preferred, _soft_penalty([*assignments, candidate], generation_preferences)[0], _slot_sort_key(slot))
+        preferred_slots = sorted(ordered_slots, key=preference_score)
         for slot in preferred_slots:
             if preferences.get((instructor_key, _identity(_value(slot, "id")))) == "unavailable":
                 continue
@@ -328,3 +345,45 @@ def detect_schedule_conflicts(
         conflicts,
         key=lambda conflict: (conflict["type"], tuple(conflict["schedule_ids"])),
     )
+
+
+def _soft_penalty(entries, options):
+    """Transparent heuristic cost; preferences never exclude a hard-valid slot."""
+    cutoff = _as_time(options.get('earliest_preferred', '09:00'))
+    early = gaps = overload = balance = 0
+    calendars = {}
+    for row in entries:
+        day = int(_value(row, 'day_of_week'))
+        start, end = _as_time(_value(row, 'start_time')), _as_time(_value(row, 'end_time'))
+        begin, finish = start.hour * 60 + start.minute, end.hour * 60 + end.minute
+        if options.get('avoid_early'):
+            early += max(0, cutoff.hour * 60 + cutoff.minute - begin) / 60
+        for resource in ['group_id', 'instructor_id']:
+            key = (resource, _identity(_value(row, resource)))
+            calendars.setdefault(key, {}).setdefault(day, []).append((begin, finish))
+    for (resource, _), days in calendars.items():
+        for intervals in days.values():
+            ordered = sorted(intervals)
+            end = ordered[0][1]
+            for start, finish in ordered[1:]:
+                gaps += max(0, start - end) / 60
+                end = max(end, finish)
+            if resource == 'group_id':
+                overload += max(0, len(intervals) - options.get('max_classes_per_day', 4))
+        counts = [len(days.get(day, [])) for day in range(1, 7)]
+        mean = sum(counts) / 6
+        balance += sum((count - mean)**2 for count in counts) / 6
+    cost = (early * options.get('early_weight', 2)
+            + (gaps * options.get('gap_weight', 3) if options.get('minimize_gaps', True) else 0)
+            + (balance * options.get('balance_weight', 1) if options.get('balance_days', True) else 0)
+            + overload * options.get('daily_weight', 2))
+    return cost, {'early_hours': round(early, 2), 'gap_hours': round(gaps, 2),
+                  'daily_excess_classes': overload, 'day_imbalance': round(balance, 2)}
+
+
+def schedule_quality(entries, options):
+    rows = list(entries)
+    cost, details = _soft_penalty(rows, options)
+    return {'score': round(100 / (1 + cost / max(1, len(rows))), 1),
+            'penalty': round(cost, 2), 'details': details,
+            'method': '100 / (1 + weighted soft penalty per class); heuristic, not proof of optimality'}

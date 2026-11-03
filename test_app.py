@@ -27,6 +27,7 @@ class FakeDatabase:
         self.teaching_loads = []
         self.instructor_availability = []
         self.schedules = []
+        self.course_room_rules = []
         self.fail_availability_insert = False
         self.add_user("admin@example.com", "AdminPassword1", "admin")
         self.add_user("student@example.com", "StudentPassword1", "student")
@@ -88,6 +89,7 @@ class FakeConnection:
         row = dict(zip([column.strip() for column in columns.split(',')], args))
         row['id'] = uuid4()
         defaults = {
+            'rooms': {'features': []},
             'courses': {'description': None, 'is_active': True, 'max_hours': 40},
             'student_groups': {'is_active': True},
             'instructors': {'is_active': True, 'max_hours': 40, 'max_unavailable_slots': 10, 'availability_deadline': None, 'title': None, 'max_weekly_minutes': None},
@@ -301,7 +303,7 @@ def seed_sprint2(database):
                    is_active=True, max_hours=40, max_unavailable_slots=2, availability_deadline=None, max_weekly_minutes=None)
     group = dict(id=uuid4(), name='CS-101', academic_year='2026-2027', student_count=20, is_active=True)
     course = dict(id=uuid4(), code='CS-1', name='Math', description=None, is_active=True, max_hours=40)
-    room = dict(id=uuid4(), name='101', building='A', capacity=30, is_active=True)
+    room = dict(id=uuid4(), name='101', building='A', capacity=30, is_active=True, features=[])
     database.instructors.append(teacher)
     database.student_groups.append(group)
     database.courses.append(course)

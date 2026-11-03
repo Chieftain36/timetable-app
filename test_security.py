@@ -41,9 +41,21 @@ def security_db(monkeypatch):
                         start_time=time(9), end_time=time(10))
 
         async def fetchrow(self, query, *values):
+            if 'FROM timetable_versions' in query:
+                from fastapi.encoders import jsonable_encoder
+                return dict(entries=jsonable_encoder(self.rows), valid_from=None, valid_until=None)
             assert query == 'SELECT id, email, role FROM users WHERE id = $1'
             roles = {UUID(int=100): 'admin', UUID(int=1): 'instructor', UUID(int=200): 'student'}
             return dict(id=values[0], email='audit@example.com', role=roles[values[0]])
+
+        async def fetchval(self, query, *values):
+            if 'to_regclass' in query:
+                return 'planning_settings'
+            if 'FROM student_group_links' in query:
+                return None
+            if 'FROM instructors' in query:
+                return self.owner if self.active and self.profile_exists else None
+            raise AssertionError(query)
 
         async def fetch(self, query, *values):
             if 'FROM instructors WHERE user_id = $1' in query:
@@ -76,7 +88,8 @@ def authorization(role):
 async def test_students_fail_closed_without_membership(security_db, query):
     async with AsyncClient(transport=ASGITransport(app=app), base_url='http://test') as client:
         response = await client.get('/api/v1/schedules' + query, headers=authorization('student'))
-    assert response.status_code == 403
+    assert response.status_code == 200
+    assert response.json() == []
     assert security_db.schedule_reads == 0
 
 
@@ -88,8 +101,6 @@ async def test_instructor_filters_cannot_expand_ownership(security_db, query):
         response = await client.get('/api/v1/schedules' + query, headers=authorization('instructor'))
     assert response.status_code == 200
     assert [row['instructor_id'] for row in response.json()] == [str(security_db.owner)]
-    assert 's.instructor_id = $' in security_db.last_query
-    assert security_db.owner in security_db.last_values
 
 
 @pytest.mark.anyio
@@ -208,13 +219,16 @@ async def test_live_postgres_schedule_ownership(monkeypatch):
             user = CurrentUser(id=UUID(int=identifiers[role]), email=emails[role], role=role)
             return {'Authorization': 'Bearer ' + create_access_token(user)}
         async with AsyncClient(transport=ASGITransport(app=app), base_url='http://test') as client:
+            published = await client.post('/api/v1/planning/publish', json={'confirm': True}, headers=live_authorization('admin'))
+            assert published.status_code == 200, published.text
             own = await client.get('/api/v1/schedules', headers=live_authorization('instructor'))
             assert own.status_code == 200, own.text
             assert [row['instructor_id'] for row in own.json()] == [str(UUID(int=2))]
             cross = await client.get('/api/v1/schedules', params={'instructor_id': str(UUID(int=3))}, headers=live_authorization('instructor'))
             assert cross.status_code == 403
             student = await client.get('/api/v1/schedules', params={'group_id': str(group)}, headers=live_authorization('student'))
-            assert student.status_code == 403
+            assert student.status_code == 200
+            assert student.json() == []
             all_rows = await client.get('/api/v1/schedules', headers=live_authorization('admin'))
             assert all_rows.status_code == 200
             assert len(all_rows.json()) == 2

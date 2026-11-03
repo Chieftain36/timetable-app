@@ -1,12 +1,12 @@
-# University Timetable — Version 2.5
+# University Timetable — Sprints 4–5
 
 Complete FastAPI + Pydantic v2 + PostgreSQL application with an English interface.
 This archive contains separate source files, tests, schema and launch scripts.
 
 ## Existing installation: read this first
 
-**Version 2.5 requires a database schema update.** Replacing only index.html is
-not sufficient. Follow UPDATE-V2.5.md. Keep your existing .env and database.
+**Sprints 4–5 require a database schema update.** Replacing only index.html is
+not sufficient. Follow [the Sprint 4–5 upgrade guide](docs/SPRINT4_5.md#upgrade-an-existing-installation). Keep your existing .env and database.
 Do not use the older version-specific update instructions from previous releases.
 
 ## First installation
@@ -159,9 +159,18 @@ restored test sources and safe disposable-database instructions. Schedule reads
 are admin-wide or scoped to an active instructor's own profile. Students cannot
 read schedules until authorized group membership is implemented. Generation
 saves immediately; replacing entries requires confirmation and has no undo.
-The UI does not implement persistent draft/publication states.
+The Sprint 4–5 workspace now provides separate working drafts and official
+publications; see [features and upgrade guide](docs/SPRINT4_5.md).
 
 Protected requests also verify the current persisted account identity. Deleted
 accounts and tokens whose role/email no longer matches return 401; the last
 administrator cannot be demoted. See [authorization lifecycle](docs/CURRENT_USER_AUTHORIZATION.md)
 for session-revocation limits and concurrency tests.
+
+## Sprint 4–5 workflow
+
+Automatic generation, room/laboratory rules, saved preferences and quality score,
+locked draft regeneration, personal published schedules, search/AND filters and
+validated publication are available in the current branch. See
+[the complete feature, API and test guide](docs/SPRINT4_5.md). Existing installations
+need the explicit migration; startup does not apply it automatically.
